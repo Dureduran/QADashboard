@@ -1,0 +1,30 @@
+{
+  "name": "copy-of-velox-revenue-management",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "lucide-react": "0.344.0",
+    "recharts": "2.12.0",
+    "react-hook-form": "7.50.1",
+    "tailwind-merge": "2.2.1",
+    "clsx": "2.1.0",
+    "@tanstack/react-query": "5.22.2",
+    "zod": "3.22.4",
+    "@tanstack/react-table": "8.13.2",
+    "@hookform/resolvers": "^5.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}

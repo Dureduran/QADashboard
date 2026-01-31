@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Velox | Revenue Management Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              border: "hsl(var(--border))",
+              input: "hsl(var(--input))",
+              ring: "hsl(var(--ring))",
+              background: "#0f172a", // Slate 950
+              foreground: "#f8fafc", // Slate 50
+              primary: {
+                DEFAULT: "#8b0050", // Qatar Burgundy-ish
+                foreground: "#ffffff",
+              },
+              secondary: {
+                DEFAULT: "#1e293b", // Slate 800
+                foreground: "#f8fafc",
+              },
+              destructive: {
+                DEFAULT: "#ef4444",
+                foreground: "#ffffff",
+              },
+              muted: {
+                DEFAULT: "#334155",
+                foreground: "#94a3b8",
+              },
+              accent: {
+                DEFAULT: "#1e293b",
+                foreground: "#f8fafc",
+              },
+              card: {
+                DEFAULT: "#1e293b", // Slate 800
+                foreground: "#f8fafc",
+              },
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #0f172a;
+        color: #f8fafc;
+      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0f172a;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #334155;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #475569;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0?dev",
+    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime?dev",
+    "react-dom": "https://esm.sh/react-dom@18.2.0?dev",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?dev",
+    "lucide-react": "https://esm.sh/lucide-react@0.344.0?dev&external=react,react-dom",
+    "recharts": "https://esm.sh/recharts@2.12.0?dev&external=react,react-dom",
+    "react-hook-form": "https://esm.sh/react-hook-form@7.50.1?dev&external=react,react-dom",
+    "@hookform/resolvers/zod": "https://esm.sh/@hookform/resolvers@3.3.4/zod?dev&external=react,react-dom,react-hook-form",
+    "tailwind-merge": "https://esm.sh/tailwind-merge@2.2.1?dev",
+    "clsx": "https://esm.sh/clsx@2.1.0?dev",
+    "@tanstack/react-query": "https://esm.sh/@tanstack/react-query@5.22.2?dev&external=react,react-dom",
+    "zod": "https://esm.sh/zod@3.22.4?dev",
+    "@tanstack/react-table": "https://esm.sh/@tanstack/react-table@8.13.2?dev&external=react,react-dom",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "@hookform/resolvers/": "https://esm.sh/@hookform/resolvers@^5.2.2/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
+  </body>
+</html>
