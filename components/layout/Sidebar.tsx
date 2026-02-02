@@ -6,6 +6,7 @@ import {
   Zap,
   UserX,
   LineChart,
+  X,
 } from 'lucide-react';
 
 import { cn } from '../../lib/utils';
@@ -13,9 +14,11 @@ import { cn } from '../../lib/utils';
 interface SidebarProps {
   currentView: string;
   onNavigate: (view: string) => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export const Sidebar = ({ currentView, onNavigate }: SidebarProps) => {
+export const Sidebar = ({ currentView, onNavigate, isOpen = false, onClose }: SidebarProps) => {
   const mainItems = [
     { name: 'Dashboard', icon: LayoutDashboard },
   ];
@@ -27,8 +30,24 @@ export const Sidebar = ({ currentView, onNavigate }: SidebarProps) => {
     { name: 'RM Assistant', icon: BrainCircuit },
   ];
 
+  const handleNavigate = (view: string) => {
+    onNavigate(view);
+    if (onClose) onClose();
+  };
+
   return (
-    <div className="hidden h-screen w-56 flex-col border-r border-slate-800/40 bg-slate-950/95 md:flex fixed left-0 top-0 z-40">
+    <>
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+          onClick={onClose}
+        />
+      )}
+      <div className={cn(
+        "h-screen w-56 flex-col border-r border-slate-800/40 bg-slate-950/95 fixed left-0 top-0 z-50 transition-transform duration-300",
+        "md:translate-x-0 md:flex",
+        isOpen ? "translate-x-0 flex" : "-translate-x-full"
+      )}>
       <div className="flex h-14 items-center px-5 border-b border-slate-800/30">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded bg-primary/80 flex items-center justify-center text-white text-[10px] font-semibold">QA</div>
@@ -44,7 +63,7 @@ export const Sidebar = ({ currentView, onNavigate }: SidebarProps) => {
           {mainItems.map((item) => (
             <button
               key={item.name}
-              onClick={() => onNavigate(item.name)}
+              onClick={() => handleNavigate(item.name)}
               className={cn(
                 "flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors text-left",
                 currentView === item.name
@@ -62,7 +81,7 @@ export const Sidebar = ({ currentView, onNavigate }: SidebarProps) => {
             {aiModules.map((item) => (
               <button
                 key={item.name}
-                onClick={() => onNavigate(item.name)}
+                onClick={() => handleNavigate(item.name)}
                 className={cn(
                   "flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors mb-0.5",
                   currentView === item.name
@@ -77,6 +96,7 @@ export const Sidebar = ({ currentView, onNavigate }: SidebarProps) => {
           </div>
         </nav>
       </div>
-    </div>
+      </div>
+    </>
   );
 };

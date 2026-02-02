@@ -55,12 +55,19 @@ interface LayoutProps {
 }
 
 const Layout = ({ children, currentView, onNavigate }: LayoutProps) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 flex">
-      <Sidebar currentView={currentView} onNavigate={onNavigate} />
-      <div className="flex-1 md:ml-56 flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-1 p-6 overflow-y-auto">
+    <div className="min-h-screen bg-slate-950 text-slate-50 flex overflow-hidden">
+      <Sidebar 
+        currentView={currentView} 
+        onNavigate={onNavigate} 
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+      <div className="flex-1 md:ml-56 flex flex-col h-screen overflow-hidden">
+        <Header onMenuClick={() => setSidebarOpen(true)} />
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto overflow-x-hidden -webkit-overflow-scrolling-touch">
           <div className="transition-opacity duration-150 ease-in-out">
             {children}
           </div>

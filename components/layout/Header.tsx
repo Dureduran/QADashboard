@@ -1,11 +1,15 @@
 import React from 'react';
-import { Bell, RefreshCw, UserCircle } from 'lucide-react';
+import { Bell, RefreshCw, UserCircle, Menu } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '../../lib/utils';
 import { useToast } from '../ui/Toast';
 
-export const Header = () => {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export const Header = ({ onMenuClick }: HeaderProps) => {
    const queryClient = useQueryClient();
    const toast = useToast();
    const [refreshing, setRefreshing] = React.useState(false);
@@ -23,10 +27,18 @@ export const Header = () => {
    };
 
    return (
-      <header className="sticky top-0 z-10 flex h-14 w-full items-center gap-4 border-b border-slate-800/30 bg-slate-950/80 px-6 backdrop-blur-sm">
-         <div className="flex-1">
-            <h1 className="text-base font-medium text-slate-200">Dashboard Overview</h1>
-            <p className="text-[11px] text-slate-500">Global Network Performance</p>
+      <header className="sticky top-0 z-10 flex h-14 w-full items-center gap-4 border-b border-slate-800/30 bg-slate-950/80 px-4 md:px-6 backdrop-blur-sm">
+         <Button
+            variant="ghost"
+            size="icon"
+            onClick={onMenuClick}
+            className="h-8 w-8 md:hidden"
+         >
+            <Menu className="h-5 w-5 text-slate-400" />
+         </Button>
+         <div className="flex-1 min-w-0">
+            <h1 className="text-base font-medium text-slate-200 truncate">Dashboard Overview</h1>
+            <p className="text-[11px] text-slate-500 hidden sm:block">Global Network Performance</p>
          </div>
 
          <div className="flex items-center gap-3">

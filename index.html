@@ -109,6 +109,16 @@
       opacity: 0;
       animation-name: slide-in-from-right;
     }
+
+    /* Mobile touch scrolling */
+    .overflow-y-auto {
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Prevent body scroll when modal/sidebar is open */
+    body.sidebar-open {
+      overflow: hidden;
+    }
   </style>
   <script type="importmap">
 {
