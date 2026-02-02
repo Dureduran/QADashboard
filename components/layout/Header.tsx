@@ -1,55 +1,59 @@
 import React from 'react';
-import { Bell, Search, UserCircle, RefreshCw } from 'lucide-react';
+import { Bell, RefreshCw, UserCircle } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useQueryClient } from '@tanstack/react-query';
+import { cn } from '../../lib/utils';
+import { useToast } from '../ui/Toast';
 
 export const Header = () => {
-    const queryClient = useQueryClient();
-    const [refreshing, setRefreshing] = React.useState(false);
+   const queryClient = useQueryClient();
+   const toast = useToast();
+   const [refreshing, setRefreshing] = React.useState(false);
 
-    const handleRefresh = async () => {
-        setRefreshing(true);
-        await queryClient.refetchQueries();
-        setTimeout(() => setRefreshing(false), 500);
-    };
+   const handleRefresh = async () => {
+      setRefreshing(true);
+      try {
+         await queryClient.refetchQueries();
+         toast.success('Data refreshed successfully');
+      } catch (error) {
+         toast.error('Refresh failed. Please try again.');
+      } finally {
+         setTimeout(() => setRefreshing(false), 500);
+      }
+   };
 
-  return (
-    <header className="sticky top-0 z-10 flex h-16 w-full items-center gap-4 border-b border-slate-800 bg-slate-900/80 px-6 backdrop-blur">
-      <div className="flex-1">
-         <h1 className="text-lg font-semibold text-slate-100">Dashboard Overview</h1>
-         <p className="text-xs text-slate-500">Global Network Performance • {new Date().toLocaleDateString()}</p>
-      </div>
-      
-      <div className="flex items-center gap-4">
-         <div className="flex items-center text-xs font-medium text-emerald-400 bg-emerald-900/20 px-2 py-1 rounded border border-emerald-900/50">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
-            System Operational
+   return (
+      <header className="sticky top-0 z-10 flex h-14 w-full items-center gap-4 border-b border-slate-800/30 bg-slate-950/80 px-6 backdrop-blur-sm">
+         <div className="flex-1">
+            <h1 className="text-base font-medium text-slate-200">Dashboard Overview</h1>
+            <p className="text-[11px] text-slate-500">Global Network Performance</p>
          </div>
 
-         <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleRefresh}
-            className={refreshing ? "animate-spin" : ""}
-            title="Refresh Data"
-         >
-            <RefreshCw className="h-5 w-5 text-slate-400" />
-         </Button>
+         <div className="flex items-center gap-3">
+            <Button
+               variant="ghost"
+               size="icon"
+               onClick={handleRefresh}
+               className={cn("h-8 w-8", refreshing ? "animate-spin" : "")}
+               title="Refresh Data"
+            >
+               <RefreshCw className="h-4 w-4 text-slate-500" />
+            </Button>
 
-         <Button variant="ghost" size="icon">
-            <Bell className="h-5 w-5 text-slate-400" />
-         </Button>
-         
-         <div className="h-8 w-px bg-slate-800 mx-2"></div>
-         
-         <div className="flex items-center gap-2">
-            <div className="text-right hidden md:block">
-                <div className="text-sm font-medium text-slate-200">Asad Durrani</div>
-                <div className="text-xs text-slate-500">Manager, Data Science</div>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+               <Bell className="h-4 w-4 text-slate-500" />
+            </Button>
+
+            <div className="h-6 w-px bg-slate-800/50 mx-1"></div>
+
+            <div className="flex items-center gap-2">
+               <div className="text-right hidden md:block">
+                  <div className="text-sm font-medium text-slate-300">Asad Durrani</div>
+                  <div className="text-[10px] text-slate-500">Data Science</div>
+               </div>
+               <UserCircle className="h-7 w-7 text-slate-500" />
             </div>
-            <UserCircle className="h-8 w-8 text-slate-400" />
          </div>
-      </div>
-    </header>
-  );
+      </header>
+   );
 };

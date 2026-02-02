@@ -113,16 +113,24 @@ export interface NoShowData {
 }
 
 export interface ElasticityScenario {
-    x: number; // Price Change %
-    y: number; // Revenue Uplift %
+  x: number; // Price Change %
+  y: number; // Revenue Uplift %
 }
 
 export interface OverbookingScenario {
-    name: string; // e.g. "+2 Seats"
-    value: number; // Net Result
+  name: string; // e.g. "+2 Seats"
+  value: number; // Net Result
 }
 
+
 export interface RAGMetric {
-    faithfulnessScore: number;
-    sources: { name: string; matchScore: number; type: string }[];
+  faithfulnessScore: number;
+  sources: { name: string; matchScore: number; type: string }[];
+}
+
+export interface UnconstrainingItem {
+  price: string;
+  bookings: number;
+  latent: number;
+  denial: number;
 }

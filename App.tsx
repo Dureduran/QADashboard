@@ -5,13 +5,10 @@ import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { StrategicDashboard } from './components/dashboard/StrategicDashboard';
 import { Assistant } from './components/dashboard/Assistant';
-import { RationaleView } from './components/dashboard/RationaleView';
-import { BusinessRulesView } from './components/dashboard/BusinessRulesView';
-import { TechSpecView } from './components/dashboard/TechSpecView';
 import { DynamicPricingPanel } from './components/dashboard/DynamicPricingPanel';
 import { NoShowPanel } from './components/dashboard/NoShowPanel';
 import { UnconstrainingPanel } from './components/dashboard/UnconstrainingPanel';
-import { DataSchemaView } from './components/dashboard/DataSchemaView';
+import { ToastProvider } from './components/ui/Toast';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,48 +20,50 @@ const queryClient = new QueryClient({
 });
 
 const RMAssistantView = () => (
-    <div className="max-w-4xl mx-auto pt-6">
-        <h2 className="text-2xl font-bold text-slate-100 mb-6">Revenue Management Assistant</h2>
-        <Assistant />
-    </div>
+  <div className="max-w-4xl mx-auto pt-6">
+    <h2 className="text-2xl font-bold text-slate-100 mb-6">Revenue Management Assistant</h2>
+    <Assistant />
+  </div>
 );
 
 const ForecastingView = () => (
-    <div className="h-full">
-         <div className="max-w-5xl mx-auto space-y-6">
-            <h2 className="text-2xl font-bold text-slate-100">Interactive Demand Forecasting</h2>
-            <div className="h-[600px]">
-                <DynamicPricingPanel />
-            </div>
-         </div>
+  <div className="h-full">
+    <div className="max-w-5xl mx-auto space-y-6">
+      <h2 className="text-2xl font-bold text-slate-100">Interactive Demand Forecasting</h2>
+      <div className="h-[600px]">
+        <DynamicPricingPanel />
+      </div>
     </div>
+  </div>
 );
 
 const NoShowView = () => (
-    <div className="h-full">
-         <div className="max-w-5xl mx-auto space-y-6">
-            <h2 className="text-2xl font-bold text-slate-100">Overbooking & No-Show Optimizer</h2>
-            <div className="h-[600px]">
-                <NoShowPanel />
-            </div>
-         </div>
+  <div className="h-full">
+    <div className="max-w-5xl mx-auto space-y-6">
+      <h2 className="text-2xl font-bold text-slate-100">Overbooking & No-Show Optimizer</h2>
+      <div className="h-[600px]">
+        <NoShowPanel />
+      </div>
     </div>
+  </div>
 );
 
 interface LayoutProps {
-    children?: React.ReactNode;
-    currentView: string;
-    onNavigate: (view: string) => void;
+  children?: React.ReactNode;
+  currentView: string;
+  onNavigate: (view: string) => void;
 }
 
 const Layout = ({ children, currentView, onNavigate }: LayoutProps) => {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 flex">
       <Sidebar currentView={currentView} onNavigate={onNavigate} />
-      <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
+      <div className="flex-1 md:ml-56 flex flex-col min-h-screen">
         <Header />
         <main className="flex-1 p-6 overflow-y-auto">
-           {children}
+          <div className="transition-opacity duration-150 ease-in-out">
+            {children}
+          </div>
         </main>
       </div>
     </div>
@@ -75,46 +74,29 @@ export default function App() {
   const [currentView, setCurrentView] = useState('Dashboard');
 
   const renderContent = () => {
-      // Tech Spec Routes
-      if ([
-        'Load Factor & RASK Gauges',
-        'Booking Pace (S-Curve)',
-        'Competitor Price Tracker',
-        'Route Profitability Waterfall',
-        'Price Elasticity Scatter',
-        'Overbooking Risk Histogram',
-        'RAG Faithfulness & Sources'
-      ].includes(currentView)) {
-        return <TechSpecView viewKey={currentView} />;
-      }
-
-      switch (currentView) {
-          case 'Dashboard':
-              return <StrategicDashboard />;
-          case 'Rationale for Route Selection':
-              return <RationaleView />;
-          case 'Assumptions & Rules':
-              return <BusinessRulesView />;
-          case 'Data Sources & Schema':
-              return <DataSchemaView />;
-          case 'RM Assistant':
-              return <RMAssistantView />;
-          case 'Demand Forecasting':
-              return <ForecastingView />;
-          case 'No-Show Predictor':
-              return <NoShowView />;
-          case 'Pricing Optimizer':
-              return <UnconstrainingPanel />;
-          default:
-              return <StrategicDashboard />;
-      }
+    switch (currentView) {
+      case 'Dashboard':
+        return <StrategicDashboard />;
+      case 'RM Assistant':
+        return <RMAssistantView />;
+      case 'Demand Forecasting':
+        return <ForecastingView />;
+      case 'No-Show Predictor':
+        return <NoShowView />;
+      case 'Pricing Optimizer':
+        return <UnconstrainingPanel />;
+      default:
+        return <StrategicDashboard />;
+    }
   };
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Layout currentView={currentView} onNavigate={setCurrentView}>
-        {renderContent()}
-      </Layout>
+      <ToastProvider>
+        <Layout currentView={currentView} onNavigate={setCurrentView}>
+          {renderContent()}
+        </Layout>
+      </ToastProvider>
     </QueryClientProvider>
   );
 }

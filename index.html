@@ -1,75 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Velox | Revenue Management Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              border: "hsl(var(--border))",
-              input: "hsl(var(--input))",
-              ring: "hsl(var(--ring))",
-              background: "#0f172a", // Slate 950
-              foreground: "#f8fafc", // Slate 50
-              primary: {
-                DEFAULT: "#8b0050", // Qatar Burgundy-ish
-                foreground: "#ffffff",
-              },
-              secondary: {
-                DEFAULT: "#1e293b", // Slate 800
-                foreground: "#f8fafc",
-              },
-              destructive: {
-                DEFAULT: "#ef4444",
-                foreground: "#ffffff",
-              },
-              muted: {
-                DEFAULT: "#334155",
-                foreground: "#94a3b8",
-              },
-              accent: {
-                DEFAULT: "#1e293b",
-                foreground: "#f8fafc",
-              },
-              card: {
-                DEFAULT: "#1e293b", // Slate 800
-                foreground: "#f8fafc",
-              },
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Qatar Airways RM Demo | Revenue Management Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            border: "hsl(var(--border))",
+            input: "hsl(var(--input))",
+            ring: "hsl(var(--ring))",
+            background: "#0f172a", // Slate 950
+            foreground: "#f8fafc", // Slate 50
+            primary: {
+              DEFAULT: "#8b0050", // Qatar Burgundy-ish
+              foreground: "#ffffff",
             },
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-            }
+            secondary: {
+              DEFAULT: "#1e293b", // Slate 800
+              foreground: "#f8fafc",
+            },
+            destructive: {
+              DEFAULT: "#ef4444",
+              foreground: "#ffffff",
+            },
+            muted: {
+              DEFAULT: "#334155",
+              foreground: "#94a3b8",
+            },
+            accent: {
+              DEFAULT: "#1e293b",
+              foreground: "#f8fafc",
+            },
+            card: {
+              DEFAULT: "#1e293b", // Slate 800
+              foreground: "#f8fafc",
+            },
           },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
         },
+      },
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+
+    /* Shimmer animation for skeleton loaders */
+    @keyframes shimmer {
+      100% {
+        transform: translateX(100%);
       }
-    </script>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: #0f172a;
-        color: #f8fafc;
+    }
+
+    /* Toast slide-in animation */
+    @keyframes slide-in-from-right {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
       }
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
       }
-      ::-webkit-scrollbar-track {
-        background: #0f172a;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #334155;
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #475569;
-      }
-    </style>
+    }
+
+    .animate-in {
+      animation-name: slide-in-from-right;
+      animation-fill-mode: both;
+    }
+
+    .slide-in-from-right-5 {
+      --tw-translate-x: 1.25rem;
+    }
+
+    .fade-in {
+      opacity: 0;
+      animation-name: slide-in-from-right;
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -93,8 +133,10 @@
 }
 </script>
 </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
-  </body>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="./index.tsx"></script>
+</body>
+
 </html>

@@ -8,6 +8,7 @@ import { api } from '../../services/mockData';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { X } from 'lucide-react';
+import { useToast } from '../ui/Toast';
 
 const schema = z.object({
   booked: z.number().min(0, "Booked count cannot be negative"),
@@ -25,7 +26,7 @@ interface EditFlightModalProps {
 export const EditFlightModal = ({ flight, isOpen, onClose }: EditFlightModalProps) => {
   const queryClient = useQueryClient();
   const [isSaving, setIsSaving] = React.useState(false);
-  const [successMsg, setSuccessMsg] = React.useState<string | null>(null);
+  const toast = useToast();
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -43,28 +44,27 @@ export const EditFlightModal = ({ flight, isOpen, onClose }: EditFlightModalProp
       const previousFlights = queryClient.getQueryData<Flight[]>(['flights']);
 
       if (previousFlights) {
-         queryClient.setQueryData<Flight[]>(['flights'], (old) => {
-            return old?.map(f => f.id === flight.id ? { ...f, ...newData, currentLoadFactor: (newData.booked / newData.capacity) * 100 } : f) || [];
-         });
+        queryClient.setQueryData<Flight[]>(['flights'], (old) => {
+          return old?.map(f => f.id === flight.id ? { ...f, ...newData, currentLoadFactor: (newData.booked / newData.capacity) * 100 } : f) || [];
+        });
       }
       return { previousFlights };
     },
     onError: (err, newTodo, context) => {
-       // Rollback
-       if (context?.previousFlights) {
-         queryClient.setQueryData(['flights'], context.previousFlights);
-       }
-       alert("Failed to update flight");
+      // Rollback
+      if (context?.previousFlights) {
+        queryClient.setQueryData(['flights'], context.previousFlights);
+      }
+      toast.error('Failed to update flight. Changes have been reverted.');
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['flights'] });
     },
     onSuccess: () => {
-        setSuccessMsg("Flight updated successfully.");
-        setTimeout(() => {
-            setSuccessMsg(null);
-            onClose();
-        }, 1500);
+      toast.success(`Flight ${flight.flightNumber} updated successfully.`);
+      setTimeout(() => {
+        onClose();
+      }, 800);
     }
   });
 
@@ -84,13 +84,13 @@ export const EditFlightModal = ({ flight, isOpen, onClose }: EditFlightModalProp
             <X className="h-5 w-5" />
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-300">Booked Seats</label>
-            <Input 
-              type="number" 
-              {...register("booked", { valueAsNumber: true })} 
+            <Input
+              type="number"
+              {...register("booked", { valueAsNumber: true })}
               className={errors.booked ? "border-red-500" : ""}
             />
             {errors.booked && <span className="text-xs text-red-500">{errors.booked.message}</span>}
@@ -98,25 +98,20 @@ export const EditFlightModal = ({ flight, isOpen, onClose }: EditFlightModalProp
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-300">Aircraft Capacity</label>
-            <Input 
-              type="number" 
+            <Input
+              type="number"
               {...register("capacity", { valueAsNumber: true })}
-               className={errors.capacity ? "border-red-500" : ""}
+              className={errors.capacity ? "border-red-500" : ""}
             />
             {errors.capacity && <span className="text-xs text-red-500">{errors.capacity.message}</span>}
           </div>
 
-          {successMsg && (
-             <div className="p-3 bg-emerald-900/30 text-emerald-400 text-sm rounded border border-emerald-800">
-                {successMsg}
-             </div>
-          )}
 
           <div className="flex justify-end gap-3 pt-4">
-             <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-             <Button type="submit" disabled={isSaving || mutation.isPending}>
-                {mutation.isPending ? 'Saving...' : 'Save Changes'}
-             </Button>
+            <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
+            <Button type="submit" disabled={isSaving || mutation.isPending}>
+              {mutation.isPending ? 'Saving...' : 'Save Changes'}
+            </Button>
           </div>
         </form>
       </div>
