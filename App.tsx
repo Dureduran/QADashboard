@@ -58,7 +58,16 @@ const Layout = ({ children, currentView, onNavigate }: LayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 flex overflow-hidden">
+    <div className="min-h-screen bg-slate-950 text-slate-50 flex overflow-hidden relative">
+      <div 
+        className="fixed inset-0 z-0 opacity-10 pointer-events-none"
+        style={{
+          backgroundImage: 'url(/qa-a350.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      />
       <Sidebar 
         currentView={currentView} 
         onNavigate={onNavigate} 
