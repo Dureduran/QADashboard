@@ -95,7 +95,7 @@ export default function App() {
         return <StrategicDashboard />;
       case 'RM Assistant':
         return <RMAssistantView />;
-      case 'Demand Forecasting':
+      case 'Forecasting':
         return <ForecastingView />;
       case 'No-Show Predictor':
         return <NoShowView />;

@@ -24,7 +24,7 @@ export const Sidebar = ({ currentView, onNavigate, isOpen = false, onClose }: Si
   ];
 
   const aiModules = [
-    { name: 'Demand Forecasting', icon: LineChart },
+    { name: 'Forecasting', icon: LineChart },
     { name: 'No-Show Predictor', icon: UserX },
     { name: 'Pricing Optimizer', icon: Zap },
     { name: 'RM Assistant', icon: BrainCircuit },
