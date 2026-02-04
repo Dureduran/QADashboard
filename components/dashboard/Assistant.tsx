@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
-import { Send, Bot, User, FileText, ShieldCheck, Database, Loader2 } from 'lucide-react';
+import { Send, Bot, User, FileText, Database, Loader2 } from 'lucide-react';
 import { ChatMessage } from '../../types';
 import { Badge } from '../ui/Badge';
 import { useToast } from '../ui/Toast';
@@ -146,50 +146,6 @@ export const Assistant = () => {
             </Card>
 
             <div className="w-full lg:w-80 flex flex-col gap-6">
-                <Card className="bg-slate-900 border-slate-800">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-bold text-slate-200 flex items-center gap-2">
-                            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                            Faithfulness Score
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center justify-center pt-4 pb-6">
-                        <div className="relative w-40 h-24 flex items-end justify-center">
-                            <svg viewBox="0 0 200 100" className="w-full h-full">
-                                <path
-                                    d="M 20 100 A 80 80 0 0 1 180 100"
-                                    fill="none"
-                                    stroke="#334155"
-                                    strokeWidth="16"
-                                    strokeLinecap="round"
-                                />
-                                <path
-                                    d="M 20 100 A 80 80 0 0 1 180 100"
-                                    fill="none"
-                                    stroke="url(#gaugeGradient)"
-                                    strokeWidth="16"
-                                    strokeLinecap="round"
-                                    strokeDasharray={`${(currentMetrics.faithfulnessScore / 100) * 251.2} 251.2`}
-                                    className="transition-all duration-1000"
-                                />
-                                <defs>
-                                    <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                        <stop offset="0%" stopColor="#ef4444" />
-                                        <stop offset="50%" stopColor="#f59e0b" />
-                                        <stop offset="100%" stopColor="#10b981" />
-                                    </linearGradient>
-                                </defs>
-                            </svg>
-                            <div className="absolute bottom-0 text-center">
-                                <div className="text-3xl font-bold text-slate-100">{currentMetrics.faithfulnessScore}%</div>
-                            </div>
-                        </div>
-                        <div className="text-xs text-slate-500 mt-3 text-center px-4">
-                            Probability that the answer is derived solely from retrieved context.
-                        </div>
-                    </CardContent>
-                </Card>
-
                 <Card className="bg-slate-900 border-slate-800 flex-1">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-bold text-slate-200 flex items-center gap-2">
