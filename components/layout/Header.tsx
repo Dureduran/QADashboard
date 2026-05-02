@@ -52,7 +52,13 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
                <RefreshCw className="h-4 w-4 text-slate-500" />
             </Button>
 
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button
+               variant="ghost"
+               size="icon"
+               className="h-8 w-8"
+               onClick={() => toast.info('No unresolved RM alerts in this demo snapshot')}
+               title="View Alerts"
+            >
                <Bell className="h-4 w-4 text-slate-500" />
             </Button>
 

@@ -102,6 +102,8 @@ export const MOCK_ELASTICITY: Record<string, ElasticityScenario[]> = {
   'DOH-SFO': [{ x: -10, y: 15 }, { x: -5, y: 8 }, { x: 0, y: 0 }, { x: 5, y: -12 }, { x: 10, y: -25 }],
   'DOH-LOS': [{ x: -10, y: 8 }, { x: -5, y: 4 }, { x: 0, y: 0 }, { x: 5, y: -4 }, { x: 10, y: -10 }], // Less elastic
   'DOH-JFK': [{ x: -10, y: 20 }, { x: -5, y: 12 }, { x: 0, y: 0 }, { x: 5, y: -18 }, { x: 10, y: -40 }], // Highly elastic
+  'DOH-PVG': [{ x: -10, y: 18 }, { x: -5, y: 10 }, { x: 0, y: 0 }, { x: 5, y: -10 }, { x: 10, y: -22 }],
+  'DOH-ZAG': [{ x: -10, y: 10 }, { x: -5, y: 5 }, { x: 0, y: 0 }, { x: 5, y: -7 }, { x: 10, y: -16 }],
   'DEFAULT': [{ x: -10, y: 12 }, { x: -5, y: 6 }, { x: 0, y: 0 }, { x: 5, y: -8 }, { x: 10, y: -18 }],
 };
 
@@ -110,6 +112,8 @@ export const MOCK_OVERBOOKING: Record<string, OverbookingScenario[]> = {
   'DOH-SFO': [{ name: '+2 Seats', value: 1200 }, { name: '+4 Seats', value: 2100 }, { name: '+6 Seats', value: 1500 }, { name: '+8 Seats', value: -800 }, { name: '+10 Seats', value: -2500 }],
   'DOH-LOS': [{ name: '+2 Seats', value: 800 }, { name: '+4 Seats', value: 1200 }, { name: '+6 Seats', value: 1800 }, { name: '+8 Seats', value: 1500 }, { name: '+10 Seats', value: 500 }], // Higher tolerance
   'DOH-JFK': [{ name: '+2 Seats', value: 2500 }, { name: '+4 Seats', value: 1800 }, { name: '+6 Seats', value: 500 }, { name: '+8 Seats', value: -1500 }, { name: '+10 Seats', value: -4000 }], // Strict
+  'DOH-PVG': [{ name: '+2 Seats', value: 900 }, { name: '+4 Seats', value: 1600 }, { name: '+6 Seats', value: 1300 }, { name: '+8 Seats', value: -200 }, { name: '+10 Seats', value: -1200 }],
+  'DOH-ZAG': [{ name: '+2 Seats', value: 700 }, { name: '+4 Seats', value: 1100 }, { name: '+6 Seats', value: 900 }, { name: '+8 Seats', value: -100 }, { name: '+10 Seats', value: -900 }],
   'DEFAULT': [{ name: '+2 Seats', value: 1000 }, { name: '+4 Seats', value: 1500 }, { name: '+6 Seats', value: 1200 }, { name: '+8 Seats', value: -500 }, { name: '+10 Seats', value: -1500 }]
 };
 
@@ -143,14 +147,22 @@ export const MOCK_CHART_DATA: ChartDataPoint[] = Array.from({ length: 30 }).map(
   budget: 50000,
 }));
 
-const generatePricingForecast = (base: number) => [
-  { month: 'Jan', historical: base * 0.9, forecast: base * 0.95, optimal: base },
-  { month: 'Feb', historical: base * 0.85, forecast: base * 0.9, optimal: base * 0.95 },
-  { month: 'Mar', historical: base, forecast: base * 1.05, optimal: base * 1.1 },
-  { month: 'Apr', historical: base * 1.05, forecast: base * 1.1, optimal: base * 1.15 },
-  { month: 'May', historical: base * 1.1, forecast: base * 1.15, optimal: base * 1.25 },
-  { month: 'Jun', historical: base * 1.15, forecast: base * 1.2, optimal: base * 1.3 },
+const PRICING_MONTHS = [
+  { month: 'Feb 2026', periodStart: '2026-02-01', historical: 0.9, forecast: 0.95, optimal: 1 },
+  { month: 'Mar 2026', periodStart: '2026-03-01', historical: 0.85, forecast: 0.9, optimal: 0.95 },
+  { month: 'Apr 2026', periodStart: '2026-04-01', historical: 1, forecast: 1.05, optimal: 1.1 },
+  { month: 'May 2026', periodStart: '2026-05-01', historical: 1.05, forecast: 1.1, optimal: 1.15 },
+  { month: 'Jun 2026', periodStart: '2026-06-01', historical: 1.1, forecast: 1.15, optimal: 1.25 },
+  { month: 'Jul 2026', periodStart: '2026-07-01', historical: 1.15, forecast: 1.2, optimal: 1.3 },
 ];
+
+const generatePricingForecast = (base: number) => PRICING_MONTHS.map(point => ({
+  month: point.month,
+  periodStart: point.periodStart,
+  historical: Math.round(base * point.historical),
+  forecast: Math.round(base * point.forecast * 10) / 10,
+  optimal: Math.round(base * point.optimal * 10) / 10,
+}));
 
 export const MOCK_PRICING_BY_ROUTE: Record<string, PricingData> = {
   'DOH-SFO': {
@@ -177,6 +189,22 @@ export const MOCK_PRICING_BY_ROUTE: Record<string, PricingData> = {
       { segment: 'Corporate', values: [5, 10, 20, 35, 60, 80, 90, 95] },
     ]
   },
+  'DOH-PVG': {
+    forecast: generatePricingForecast(380),
+    matrix: [
+      { segment: 'Leisure', values: [25, 35, 55, 74, 88, 94, 97, 100] },
+      { segment: 'Business', values: [8, 15, 28, 44, 63, 79, 88, 93] },
+      { segment: 'Corporate', values: [4, 9, 18, 31, 52, 70, 82, 88] },
+    ]
+  },
+  'DOH-ZAG': {
+    forecast: generatePricingForecast(320),
+    matrix: [
+      { segment: 'Leisure', values: [18, 30, 48, 68, 84, 91, 96, 100] },
+      { segment: 'Business', values: [6, 12, 24, 42, 58, 74, 84, 91] },
+      { segment: 'Corporate', values: [2, 6, 14, 28, 46, 66, 78, 86] },
+    ]
+  },
   'DEFAULT': {
     forecast: generatePricingForecast(400),
     matrix: [
@@ -199,6 +227,14 @@ export const MOCK_NOSHOW_BY_ROUTE: Record<string, NoShowData> = {
   'DOH-LOS': {
     risk: [{ name: 'High Risk', value: 50, color: '#ef4444' }, { name: 'Medium Risk', value: 30, color: '#f59e0b' }, { name: 'Low Risk', value: 20, color: '#10b981' }], // Risky
     scatter: Array.from({ length: 50 }).map(() => ({ x: Math.random(), y: Math.floor(Math.random() * 900) + 150, fill: Math.random() > 0.7 ? '#8884d8' : '#82ca9d' }))
+  },
+  'DOH-PVG': {
+    risk: [{ name: 'High Risk', value: 22, color: '#ef4444' }, { name: 'Medium Risk', value: 42, color: '#f59e0b' }, { name: 'Low Risk', value: 36, color: '#10b981' }],
+    scatter: Array.from({ length: 50 }).map(() => ({ x: Math.random(), y: Math.floor(Math.random() * 850) + 180, fill: Math.random() > 0.45 ? '#8884d8' : '#82ca9d' }))
+  },
+  'DOH-ZAG': {
+    risk: [{ name: 'High Risk', value: 28, color: '#ef4444' }, { name: 'Medium Risk', value: 34, color: '#f59e0b' }, { name: 'Low Risk', value: 38, color: '#10b981' }],
+    scatter: Array.from({ length: 50 }).map(() => ({ x: Math.random(), y: Math.floor(Math.random() * 650) + 120, fill: Math.random() > 0.55 ? '#8884d8' : '#82ca9d' }))
   },
   'DEFAULT': {
     risk: [{ name: 'High Risk', value: 25, color: '#ef4444' }, { name: 'Medium Risk', value: 40, color: '#f59e0b' }, { name: 'Low Risk', value: 35, color: '#10b981' }],
@@ -227,6 +263,20 @@ export const MOCK_UNCONSTRAINING_BY_ROUTE: Record<string, UnconstrainingItem[]> 
     { price: '120', bookings: 75, latent: 90, denial: 15 },
     { price: '140', bookings: 50, latent: 55, denial: 5 },
     { price: '160', bookings: 30, latent: 30, denial: 0 },
+  ],
+  'DOH-PVG': [
+    { price: '90', bookings: 88, latent: 118, denial: 30 },
+    { price: '115', bookings: 76, latent: 95, denial: 19 },
+    { price: '140', bookings: 64, latent: 72, denial: 8 },
+    { price: '165', bookings: 50, latent: 53, denial: 3 },
+    { price: '190', bookings: 35, latent: 35, denial: 0 },
+  ],
+  'DOH-ZAG': [
+    { price: '70', bookings: 72, latent: 88, denial: 16 },
+    { price: '95', bookings: 64, latent: 74, denial: 10 },
+    { price: '120', bookings: 51, latent: 56, denial: 5 },
+    { price: '145', bookings: 39, latent: 40, denial: 1 },
+    { price: '170', bookings: 24, latent: 24, denial: 0 },
   ],
   'DEFAULT': [
     { price: '100', bookings: 80, latent: 90, denial: 10 },

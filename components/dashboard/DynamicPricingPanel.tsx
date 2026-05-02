@@ -3,9 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/mockData';
 import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area
+    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
-import { Calendar, Info, Check } from 'lucide-react';
+import { Calendar, Check } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { RouteSelector } from './RouteSelector';
 import { ModuleExplanation } from './ModuleExplanation';
@@ -28,6 +28,49 @@ const HeatmapCell: React.FC<{ value: number }> = ({ value }) => {
     );
 };
 
+const MONTH_INDEX: Record<string, number> = {
+    jan: 0,
+    january: 0,
+    feb: 1,
+    february: 1,
+    mar: 2,
+    march: 2,
+    apr: 3,
+    april: 3,
+    may: 4,
+    jun: 5,
+    june: 5,
+    jul: 6,
+    july: 6,
+    aug: 7,
+    august: 7,
+    sep: 8,
+    sept: 8,
+    september: 8,
+    oct: 9,
+    october: 9,
+    nov: 10,
+    november: 10,
+    dec: 11,
+    december: 11,
+};
+
+const getForecastSortKey = (point: { month: string; periodStart?: string }, index: number) => {
+    if (point.periodStart) {
+        const parsedDate = new Date(point.periodStart);
+        if (!Number.isNaN(parsedDate.getTime())) return parsedDate.getTime();
+    }
+
+    const monthMatch = point.month.match(/([A-Za-z]+)\s*(\d{4})?/);
+    if (!monthMatch) return Number.MAX_SAFE_INTEGER + index;
+
+    const monthIndex = MONTH_INDEX[monthMatch[1].toLowerCase()];
+    if (monthIndex === undefined) return Number.MAX_SAFE_INTEGER + index;
+
+    const year = monthMatch[2] ? Number(monthMatch[2]) : 2026;
+    return year * 12 + monthIndex;
+};
+
 export const DynamicPricingPanel = () => {
     const [selectedRoute, setSelectedRoute] = useState('DOH-SFO');
     const [applied, setApplied] = useState(false);
@@ -39,6 +82,9 @@ export const DynamicPricingPanel = () => {
     });
 
     const data = pricingData || { forecast: [], matrix: [] };
+    const forecastSeries = [...(data.forecast || [])].sort((a, b) => {
+        return getForecastSortKey(a, 0) - getForecastSortKey(b, 0);
+    });
 
     const handleApply = () => {
         setApplied(true);
@@ -61,7 +107,7 @@ export const DynamicPricingPanel = () => {
                             <RouteSelector selectedRoute={selectedRoute} onSelect={setSelectedRoute} size="sm" />
                             <div className="flex items-center gap-2 bg-slate-950 border border-slate-700 rounded px-2 py-1 h-[26px]">
                                 <span className="text-[10px] text-slate-400">Date</span>
-                                <span className="text-[10px] font-semibold text-slate-200">28, Jan 2026</span>
+                                <span className="text-[10px] font-semibold text-slate-200">28 Jan 2026</span>
                                 <Calendar className="w-3 h-3 text-slate-400" />
                             </div>
                         </div>
@@ -77,7 +123,7 @@ export const DynamicPricingPanel = () => {
                             <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-slate-300 border border-dashed border-slate-500"></div>Optimal</div>
                         </div>
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={data?.forecast} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
+                            <LineChart data={forecastSeries} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                                 <XAxis dataKey="month" stroke="#64748b" fontSize={10} axisLine={false} tickLine={false} />
                                 <YAxis stroke="#64748b" fontSize={10} axisLine={false} tickLine={false} />
@@ -129,7 +175,7 @@ export const DynamicPricingPanel = () => {
                                 <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
                                 <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Recommended Action</div>
                                 <p className="text-xs text-slate-200 leading-relaxed">
-                                    Increase 'J' class availability for {selectedRoute} on NOV 15 due to high corporate demand forecast (+18%).
+                                    Protect higher-yield inventory for {selectedRoute}; close K/L/M if pickup remains above baseline in the next snapshot.
                                 </p>
                                 <div className="mt-2 flex justify-end">
                                     <button

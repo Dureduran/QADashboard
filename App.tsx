@@ -20,7 +20,7 @@ const queryClient = new QueryClient({
 });
 
 const RMAssistantView = () => (
-  <div className="max-w-4xl mx-auto pt-6">
+  <div className="max-w-7xl mx-auto pt-6">
     <h2 className="text-2xl font-bold text-slate-100 mb-6">Revenue Management Assistant</h2>
     <Assistant />
   </div>

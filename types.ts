@@ -80,6 +80,7 @@ export interface ChatMessage {
 
 export interface PricingForecast {
   month: string;
+  periodStart?: string;
   historical: number;
   forecast: number;
   optimal: number;
