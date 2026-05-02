@@ -60,7 +60,7 @@ const SPECS: Record<string, SpecData> = {
       "S-Curve Fitting: Logistic function regression $P(t) = \frac{L}{1 + e^{-k(t-t_0)}}$."
     ],
     scenario: {
-        problem: "Bookings for DOH-LHR are 20% ahead of Last Year at 60 days out. Standard forecast assumes normal pace.",
+        problem: "Bookings for DOH-JFK are 12% ahead of forecast at 60 days out. Standard forecast assumes normal pace.",
         action: "Model identifies 'Premature Sell-Out Risk'. System recommends restricting discount economy classes (O, Q, T) immediately.",
         uplift: "Prevents selling out the plane 2 weeks early at low fares. Saves last 30 seats for business travelers paying 3x fare. Est. Impact: +$25k revenue."
     }

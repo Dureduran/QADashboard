@@ -133,13 +133,13 @@ export const MOCK_RAG_METRICS: RAGMetric = {
   sources: [
     { name: 'Corp_Protection_Rule_4.2.pdf', matchScore: 98, type: 'Policy' },
     { name: 'Q3_2025_Revenue_Report.pdf', matchScore: 85, type: 'Report' },
-    { name: 'DOH_LHR_Market_Brief.docx', matchScore: 78, type: 'Brief' }
+    { name: 'DOH_SFO_Market_Brief.docx', matchScore: 78, type: 'Brief' }
   ]
 };
 
 // Legacy & General Data
 export const MOCK_FLIGHTS: Flight[] = [
-  { id: 'f1', flightNumber: 'QR001', origin: 'DOH', destination: 'LHR', departureDate: new Date().toISOString(), aircraft: 'A380', capacity: 517, booked: 510, forecastLoadFactor: 98, currentLoadFactor: 98.6, rask: 12.4, yield: 14.2, status: 'Overbooked' },
+  { id: 'f1', flightNumber: 'QR737', origin: 'DOH', destination: 'SFO', departureDate: new Date().toISOString(), aircraft: 'A350', capacity: 327, booked: 268, forecastLoadFactor: 88, currentLoadFactor: 82, rask: 9.8, yield: 11.5, status: 'Opportunity' },
   { id: 'f2', flightNumber: 'QR701', origin: 'DOH', destination: 'JFK', departureDate: new Date().toISOString(), aircraft: 'B777', capacity: 354, booked: 280, forecastLoadFactor: 85, currentLoadFactor: 79.1, rask: 10.8, yield: 13.5, status: 'Opportunity' },
 ];
 

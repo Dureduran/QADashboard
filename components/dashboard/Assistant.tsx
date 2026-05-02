@@ -86,7 +86,7 @@ const INITIAL_RECOMMENDATION: VerifiedRecommendation = {
     groundingScore: 100,
     evidence: ['Four deterministic RM agents are ready.'],
     risks: ['No action has been requested yet.'],
-    triggers: ['Ask: Should we close K/L/M on QR123 DOH-LHR D-7?'],
+    triggers: ['Ask: Should we close K/L/M on DOH-SFO?'],
 };
 
 const INITIAL_METRICS: AIResponse = {
@@ -97,7 +97,7 @@ const INITIAL_METRICS: AIResponse = {
     abstained: false,
     sources: [
         { name: 'Corp_Protection_Rule_4.2.pdf', matchScore: 99, type: 'Policy', citation: '[Doc: Corp_Protection_Rule_4.2.pdf section 4.2]' },
-        { name: 'QR123_Booking_Curve_Snapshot.json', matchScore: 97, type: 'Dashboard', citation: '[Dashboard Snapshot: 2026-01-28 09:00 AST - QR123 DOH-LHR Economy]' },
+        { name: 'DOH-SFO_Route_KPI_Snapshot.json', matchScore: 97, type: 'Dashboard', citation: '[Dashboard KPI: DOH-SFO]' },
         { name: 'Google Flights Competitive Fares', matchScore: 94, type: 'Market', citation: '[Google Flights API: 2026-01-28 08:45 AST]' },
     ],
     trace: INITIAL_AGENT_RUNS.map(({ name, role, status, detail }) => ({ name, role, status, detail })),
@@ -112,9 +112,11 @@ const INITIAL_METRICS: AIResponse = {
 };
 
 const QUICK_PROMPTS = [
-    'Should we close K/L/M on QR123 DOH-LHR D-7?',
+    'Should we close K/L/M on DOH-SFO?',
+    'What should we do on DOH-PVG?',
+    'How should we handle DOH-LOS?',
     'Give recommendations for all dashboard routes.',
-    'What if competitor fare data is stale?',
+    'What if competitor fare data is stale for DOH-SFO?',
 ];
 
 const statusClass = {
@@ -475,7 +477,7 @@ export const Assistant = () => {
                         <Input
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            placeholder="Ask: Should we close K/L/M on QR123 DOH-LHR D-7?"
+                            placeholder="Ask: Should we close K/L/M on DOH-SFO?"
                             className="flex-1 bg-slate-950 border-slate-700"
                             disabled={isTyping}
                         />

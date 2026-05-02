@@ -77,25 +77,10 @@ export interface AIResponse {
   reviewTriggers?: string[];
 }
 
-const RM_DEMO_SNAPSHOT = {
-  route: 'DOH-LHR',
-  flight: 'QR123',
-  horizon: 'D-7',
-  cabin: 'Economy',
-  currentLoadFactor: 91,
-  forecastLoadFactor: 96,
-  bookingPickup: '+14% vs last 7-day baseline',
-  lowestOpenClasses: 'K/L/M',
-  competitorFreshnessHours: 2,
-  corporateShare: 31,
-  eventRisk: 'Moderate',
-  timestamp: '2026-01-28 09:00 AST',
-};
-
 const CITES = {
-  snapshot: '[Dashboard Snapshot: 2026-01-28 09:00 AST - QR123 DOH-LHR Economy]',
+  snapshot: '[Dashboard Snapshot: 2026-01-28 09:00 AST - dashboard route KPI]',
   policy: '[Doc: Corp_Protection_Rule_4.2.pdf section 4.2]',
-  curve: '[Dashboard Snapshot: 2026-01-28 09:00 AST - booking curve]',
+  curve: '[Dashboard Snapshot: 2026-01-28 09:00 AST - dashboard booking curve]',
   market: '[Google Flights API: 2026-01-28 08:45 AST]',
   report: '[Doc: Q3_2025_Revenue_Report.pdf section Europe O&D]',
 };
@@ -135,15 +120,14 @@ function detectRoute(query: string): string {
   const upper = query.toUpperCase();
   const route = upper.match(/DOH[-\s]([A-Z]{3})/);
   if (route) return `DOH-${route[1]}`;
-  if (upper.includes('LHR') || upper.includes('QR123')) return 'DOH-LHR';
   const known = Object.keys(MOCK_ROUTE_KPIS).find(r => upper.includes(r));
-  return known || 'DOH-LHR';
+  return known || 'DOH-SFO';
 }
 
 function sourceList(): CitationSource[] {
   return [
     { name: 'Corp_Protection_Rule_4.2.pdf', matchScore: 99, type: 'Policy', citation: CITES.policy },
-    { name: 'QR123_Booking_Curve_Snapshot.json', matchScore: 97, type: 'Dashboard', citation: CITES.curve },
+    { name: 'Dashboard_Route_KPI_Snapshot.json', matchScore: 97, type: 'Dashboard', citation: CITES.snapshot },
     { name: 'Google Flights Competitive Fares', matchScore: 94, type: 'Market', citation: CITES.market },
     { name: 'Q3_2025_Revenue_Report.pdf', matchScore: 91, type: 'Report', citation: CITES.report },
   ];
@@ -244,9 +228,9 @@ function buildAgentRuns(mode: RecommendationMode, routeLabel: string): AgentRun[
                   'Recommended selective fare-class protection with clear review triggers.',
                 ]
           : [
-            `Read ${RM_DEMO_SNAPSHOT.flight} ${RM_DEMO_SNAPSHOT.route} ${RM_DEMO_SNAPSHOT.horizon} ${RM_DEMO_SNAPSHOT.cabin} snapshot.`,
-            `Compared current LF ${RM_DEMO_SNAPSHOT.currentLoadFactor}% against forecast LF ${RM_DEMO_SNAPSHOT.forecastLoadFactor}%.`,
-            `Flagged low buckets ${RM_DEMO_SNAPSHOT.lowestOpenClasses} as closure candidates.`,
+            `Read dashboard KPI and booking visuals for ${routeLabel}.`,
+            'Compared current load factor against target band and booking pace.',
+            'Flagged only route-appropriate inventory actions.',
           ],
     },
     {
@@ -299,8 +283,8 @@ function buildAgentRuns(mode: RecommendationMode, routeLabel: string): AgentRun[
                     'Recommended route-specific monitoring before low-bucket closure.',
                   ]
             : [
-              `Checked Google Flights fare feed from ${RM_DEMO_SNAPSHOT.timestamp}.`,
-              `Confirmed competitor freshness at ${RM_DEMO_SNAPSHOT.competitorFreshnessHours} hours.`,
+              'Checked Google Flights fare feed timestamp for the dashboard route.',
+              'Confirmed competitor freshness inside the dashboard route review window.',
               'No competitor undercut large enough to keep low buckets open.',
             ],
     },
@@ -620,36 +604,6 @@ function buildRouteDecision(route: string): RouteDecision {
   };
 }
 
-function buildClaims(abstained: boolean): VerifiedClaim[] {
-  return [
-    {
-      claim: 'QR123 DOH-LHR is inside the D-7 decision window.',
-      citation: CITES.snapshot,
-      grounded: true,
-    },
-    {
-      claim: 'Forecast load factor is above the analyst target band.',
-      citation: CITES.snapshot,
-      grounded: true,
-    },
-    {
-      claim: 'Recent pickup is stronger than the last 7-day baseline.',
-      citation: CITES.curve,
-      grounded: true,
-    },
-    {
-      claim: 'Corporate protection must be preserved before closing lower classes.',
-      citation: CITES.policy,
-      grounded: true,
-    },
-    {
-      claim: abstained ? 'Competitor fares are current enough for a pricing action.' : 'Competitor fares were refreshed within the freshness window.',
-      citation: abstained ? 'null - stale market feed' : CITES.market,
-      grounded: !abstained,
-    },
-  ];
-}
-
 function buildDashboardRouteClaims(route: string, loadFactor: number, targetLoadFactor: number): VerifiedClaim[] {
   return [
     {
@@ -730,7 +684,7 @@ export async function getAIResponse(
   const query = userMessage.toLowerCase();
   const wantsPortfolio = query.includes('all routes') || query.includes('all the routes') || query.includes('dashboard routes') || query.includes('portfolio');
   const route = detectRoute(userMessage);
-  const isKnownDemoRoute = route === 'DOH-LHR' || Boolean(MOCK_ROUTE_KPIS[route]);
+  const isKnownDemoRoute = Boolean(MOCK_ROUTE_KPIS[route]);
   const staleRequested = query.includes('stale') || query.includes('outdated') || query.includes('missing competitor');
 
   await new Promise(resolve => setTimeout(resolve, 250));
@@ -811,11 +765,9 @@ export async function getAIResponse(
 
   const abstained = staleRequested;
   const kpi = MOCK_ROUTE_KPIS[route];
-  const snapshotText = route === 'DOH-LHR'
-    ? `${RM_DEMO_SNAPSHOT.flight} ${RM_DEMO_SNAPSHOT.route} ${RM_DEMO_SNAPSHOT.horizon}`
-    : `${route} with ${kpi.loadFactor}% load factor versus ${kpi.targetLoadFactor}% target`;
+  const snapshotText = `${route} with ${kpi.loadFactor}% load factor versus ${kpi.targetLoadFactor}% target`;
 
-  if (route !== 'DOH-LHR' && !abstained) {
+  if (!abstained) {
     const decision = buildRouteDecision(route);
     const agentRuns = buildAgentRuns(decision.mode, snapshotText);
     const verifiedRecommendation = buildVerifiedRecommendation(
@@ -847,22 +799,23 @@ export async function getAIResponse(
   }
 
   if (abstained) {
+    const decision = buildRouteDecision(route);
     const agentRuns = buildAgentRuns('stale', snapshotText);
     const verifiedRecommendation = buildVerifiedRecommendation(
       'withheld',
       'Recommendation withheld until competitor fares refresh',
-      `The RM Advisor can evaluate K/L/M closure on ${snapshotText}, but the Policy Verifier cannot ground the competitor-fare claim because the market feed is stale.`,
+      `The RM Advisor can evaluate ${route} using the dashboard visuals, but the Policy Verifier cannot ground the competitor-fare claim because the market feed is stale.`,
       0.61,
       80,
       [
-        'Route, load, pickup, and corporate-protection claims are grounded.',
+        `${route} load, target, elasticity, overbooking, and no-show claims are grounded.`,
         'The market-fare freshness rule failed and blocks the action.',
       ],
       [
-        'Recent pickup could be event-driven rather than durable demand.',
-        'Closing low buckets without fresh competitor fares could overprice against the market.',
+        ...decision.risks.slice(0, 1),
+        'Any inventory or pricing action without fresh competitor fares could misread market position.',
       ],
-      ['Competitor feed refresh', 'Pickup normalizes for two snapshots', 'Analyst overrides corporate protection rule'],
+      ['Competitor feed refresh', ...decision.triggers.slice(0, 2)],
     );
 
     return attachTrace({
@@ -871,57 +824,27 @@ export async function getAIResponse(
       confidence: verifiedRecommendation.confidence,
       abstained: true,
       faithfulnessScore: verifiedRecommendation.groundingScore,
-      sources: sourceList(),
+      sources: decision.sources,
       agentRuns,
       verifiedRecommendation,
-      claims: buildClaims(true),
-      rules: buildRules(true),
+      claims: [
+        ...decision.claims.slice(0, 4),
+        {
+          claim: 'Competitor fares are current enough for a pricing action.',
+          citation: 'null - stale market feed',
+          grounded: false,
+        },
+      ],
+      rules: [
+        { name: 'Stale-data check', status: 'blocked', detail: `${route} competitor fare feed is stale; refresh before filing any inventory or pricing action.` },
+        ...decision.rules.slice(0, 3),
+      ],
       objections: verifiedRecommendation.risks,
       counterfactuals: [
-        'If Google Flights refreshes inside the freshness window and QR remains below the market ceiling, rerun closure recommendation.',
-        'If competitor fares drop more than 5%, keep L open and review again in 2 hours.',
+        `If ${route} competitor fares refresh inside the freshness window, rerun the route-specific recommendation.`,
+        ...decision.counterfactuals.slice(0, 2),
       ],
       reviewTriggers: verifiedRecommendation.triggers,
     });
   }
-
-  const agentRuns = buildAgentRuns('verified', snapshotText);
-  const verifiedRecommendation = buildVerifiedRecommendation(
-    'verified',
-    `Close K/L/M for ${snapshotText} with analyst approval`,
-    'Forecast load is above target, pickup is running hot, and yield-floor/corporate-protection checks pass.',
-    0.86,
-    100,
-    [
-      'Forecast load factor is above the analyst target band.',
-      'Recent pickup is stronger than the last 7-day baseline.',
-      'Competitor fares are fresh enough to support the action.',
-      'Corporate protection remains preserved above the low buckets.',
-    ],
-    [
-      'Recent pickup may be event-driven, so do not treat it as durable demand without the next snapshot.',
-      'Corporate demand needs protected availability; avoid closing higher corporate classes.',
-    ],
-    ['Competitor fare move >5%', 'Forecast load changes by 2 points', 'New group request above 12 seats', 'Policy override requested'],
-  );
-
-  return attachTrace({
-    content: `Verified recommendation: ${verifiedRecommendation.action}. ${verifiedRecommendation.rationale}`,
-    recommendation: 'Close K/L/M with analyst approval',
-    confidence: verifiedRecommendation.confidence,
-    abstained: false,
-    faithfulnessScore: verifiedRecommendation.groundingScore,
-    sources: sourceList(),
-    agentRuns,
-    verifiedRecommendation,
-    claims: buildClaims(false),
-    rules: buildRules(false),
-    objections: verifiedRecommendation.risks,
-    counterfactuals: [
-      'Flip to hold if competitor fares drop more than 5%.',
-      'Reopen M if pickup falls below baseline for two consecutive snapshots.',
-      'Escalate approval if forecast load factor crosses 98%.',
-    ],
-    reviewTriggers: verifiedRecommendation.triggers,
-  });
 }
