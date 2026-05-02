@@ -40,16 +40,32 @@ test('dashboard navigation, actions, and RM assistant demo path work', async ({ 
   await expect(page.getByText('Optimization Complete')).toBeVisible({ timeout: 5000 });
 
   await page.getByRole('button', { name: 'RM Assistant' }).click();
-  await expect(page.getByText('RM Assistant: Decision Rationale')).toBeVisible();
+  await expect(page.getByText('RM Assistant: Agent Decision Council')).toBeVisible();
   await page.getByRole('button', { name: 'Should we close K/L/M on QR123 DOH-LHR D-7?' }).click();
   await page.getByPlaceholder(/Should we close K\/L\/M/i).press('Enter');
-  await expect(page.getByText('Recommendation: close K/L/M')).toBeVisible({ timeout: 8000 });
-  await expect(page.getByText('Verified 5/5 claims')).toBeVisible();
+  await expect(page.getByText('Agents thinking')).toBeVisible({ timeout: 3000 });
+  await expect(page.getByText('RM Advisor - Inventory and revenue action')).toBeVisible();
+  await expect(page.getByText('Competitor Fares - Market fare freshness')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByText('Policy Verifier - Rules and citations')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByText('Synthesizer - Verified RM response')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByText('Verified Recommendation')).toBeVisible({ timeout: 8000 });
+  await expect(page.getByRole('heading', { name: 'Close K/L/M for QR123 DOH-LHR D-7 with analyst approval' })).toBeVisible();
   await expect(page.getByText('Flip to hold if competitor fares drop more than 5%.')).toBeVisible();
+
+  await page.getByPlaceholder(/Should we close K\/L\/M/i).fill('Should we close K/L/M on DOH-SFO?');
+  await page.getByPlaceholder(/Should we close K\/L\/M/i).press('Enter');
+  await expect(page.getByRole('heading', { name: 'Do not close K/L/M for DOH-SFO; keep low buckets open and stimulate demand' })).toBeVisible({ timeout: 8000 });
+  await expect(page.getByRole('listitem').filter({ hasText: 'DOH-SFO load factor is 82% versus 90% target.' }).first()).toBeVisible();
+
+  await page.getByRole('button', { name: 'Give recommendations for all dashboard routes.' }).click();
+  await page.getByPlaceholder(/Should we close K\/L\/M/i).press('Enter');
+  await expect(page.getByRole('heading', { name: 'Use route-specific RM actions; do not apply one blanket K/L/M closure rule' })).toBeVisible({ timeout: 8000 });
+  await expect(page.getByRole('listitem').filter({ hasText: 'DOH-PVG: keep K/L/M open, stimulate demand, and review pricing before inventory restriction' }).first()).toBeVisible();
+  await expect(page.getByText('Blanket closure guardrail')).toBeVisible();
 
   await page.getByRole('button', { name: 'What if competitor fare data is stale?' }).click();
   await page.getByPlaceholder(/Should we close K\/L\/M/i).press('Enter');
-  await expect(page.getByText('Recommendation withheld')).toBeVisible({ timeout: 8000 });
+  await expect(page.getByRole('heading', { name: 'Recommendation withheld until competitor fares refresh' })).toBeVisible({ timeout: 8000 });
   await expect(page.getByText('Abstained')).toBeVisible();
   await expect(page.getByText('null - stale market feed')).toBeVisible();
 
