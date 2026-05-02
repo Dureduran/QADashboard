@@ -14,6 +14,85 @@ import { useToast } from '../ui/Toast';
 
 const ROUTES = ['DOH-SFO', 'DOH-JFK', 'DOH-LOS', 'DOH-PVG', 'DOH-ZAG'];
 
+const averageElasticity = (points: { x: number; y: number }[] = []) => {
+    const positive = points.filter(point => point.x < 0 && point.y > 0);
+    if (!positive.length) return -1.1;
+    const avg = positive.reduce((sum, point) => sum + Math.abs(point.y / point.x), 0) / positive.length;
+    return -Math.round(avg * 10) / 10;
+};
+
+const getBestScenario = <T extends { value: number }>(items: T[] = []) => {
+    if (!items.length) return null;
+    return items.reduce((best, item) => item.value > best.value ? item : best, items[0]);
+};
+
+const getSimulationScenario = (
+    route: string,
+    uplift: number,
+    kpi?: { loadFactor: number; targetLoadFactor: number; rask: number; yield: number },
+    elasticity: { x: number; y: number }[] = [],
+    overbooking: { name: string; value: number }[] = []
+) => {
+    const loadGap = kpi ? kpi.targetLoadFactor - kpi.loadFactor : 0;
+    const elasticityScore = averageElasticity(elasticity);
+    const bestOverbooking = getBestScenario(overbooking);
+    const aggressive = uplift > 10;
+    const simulatedLoadFactor = kpi ? Math.min(99, Math.round(kpi.loadFactor * (1 + uplift / 100))) : 0;
+    const simulatedRask = kpi ? Math.round((kpi.rask * (1 + uplift * 0.004)) * 10) / 10 : 0;
+    const simulatedYield = kpi ? Math.round((kpi.yield * (1 - uplift * 0.002)) * 10) / 10 : 0;
+    const revenueDelta = Math.round((uplift * 0.8) * 12500);
+
+    if (route === 'DOH-LOS') {
+        return {
+            label: 'Forecast Demand Uplift Scenario',
+            action: aggressive ? 'Apply with no-show guardrail' : 'Safe with overbooking controls',
+            detail: `High-yield route with softer demand. Pair uplift with ${bestOverbooking?.name || '+4 Seats'} overbooking control and avoid broad discounting.`,
+            elasticityLabel: `${elasticityScore} (Moderate)`,
+            revenueDelta,
+            simulatedLoadFactor,
+            simulatedRask,
+            simulatedYield,
+        };
+    }
+
+    if (loadGap >= 10) {
+        return {
+            label: 'Forecast Demand Uplift Scenario',
+            action: aggressive ? 'Monitor yield dilution' : 'Safe demand stimulation',
+            detail: `Route is ${loadGap} pts below target. Use the scenario to test demand stimulation before restricting inventory.`,
+            elasticityLabel: `${elasticityScore} (High)`,
+            revenueDelta,
+            simulatedLoadFactor,
+            simulatedRask,
+            simulatedYield,
+        };
+    }
+
+    if (loadGap > 0) {
+        return {
+            label: 'Forecast Demand Uplift Scenario',
+            action: aggressive ? 'Monitor for spill' : 'Safe selective protection',
+            detail: 'If simulated PLF reaches the target band, review only the lowest bucket first.',
+            elasticityLabel: `${elasticityScore} (Balanced)`,
+            revenueDelta,
+            simulatedLoadFactor,
+            simulatedRask,
+            simulatedYield,
+        };
+    }
+
+    return {
+        label: 'Forecast Demand Uplift Scenario',
+        action: aggressive ? 'Protect yield before adding demand' : 'Safe to implement',
+        detail: 'Route is at or above target, so extra demand should trigger fare-class protection review.',
+        elasticityLabel: `${elasticityScore} (Low)`,
+        revenueDelta,
+        simulatedLoadFactor,
+        simulatedRask,
+        simulatedYield,
+    };
+};
+
 export const StrategicDashboard = () => {
     const [selectedRoute, setSelectedRoute] = useState('DOH-SFO');
     const [upliftScenario, setUpliftScenario] = useState(0); // 0% to 15%
@@ -51,6 +130,13 @@ export const StrategicDashboard = () => {
         queryFn: () => api.getOverbookingData(selectedRoute)
     });
 
+    const scenario = getSimulationScenario(selectedRoute, upliftScenario, kpi, elasticity, overbooking);
+    const displayedLoadFactor = simulationActive && scenario.simulatedLoadFactor ? scenario.simulatedLoadFactor : kpi?.loadFactor;
+    const displayedRask = simulationActive && scenario.simulatedRask ? scenario.simulatedRask : kpi?.rask;
+    const displayedYield = simulationActive && scenario.simulatedYield ? scenario.simulatedYield : kpi?.yield;
+    const displayedRaskTrend = simulationActive ? Math.round(((scenario.simulatedRask - (kpi?.rask || 0)) / (kpi?.rask || 1)) * 1000) / 10 : kpi?.raskTrend;
+    const displayedYieldTrend = simulationActive ? Math.round(((scenario.simulatedYield - (kpi?.yield || 0)) / (kpi?.yield || 1)) * 1000) / 10 : kpi?.yieldTrend;
+
     // Handle Simulation
     const handleApplySimulation = () => {
         if (upliftScenario === 0) {
@@ -62,7 +148,7 @@ export const StrategicDashboard = () => {
         setTimeout(() => {
             setIsApplying(false);
             setSimulationActive(true);
-            toast.success(`Simulation applied: +${upliftScenario}% uplift to ${selectedRoute} forecast`);
+            toast.success(`Scenario applied to ${selectedRoute}: PLF, RASK, yield, booking pace, and profit waterfall updated.`);
         }, 800);
     };
 
@@ -80,7 +166,17 @@ export const StrategicDashboard = () => {
     }));
 
     // Waterfall Chart Data Preparation (for floating bars)
-    const processedWaterfall = waterfall?.map((item, index, arr) => {
+    const simulatedWaterfall = waterfall && simulationActive && upliftScenario > 0
+        ? waterfall.flatMap(item => {
+            if (item.name !== 'Net Profit') return [item];
+            return [
+                { name: 'Simulation Uplift', value: scenario.revenueDelta, type: 'increase' as const },
+                { ...item, value: item.value + scenario.revenueDelta },
+            ];
+        })
+        : waterfall;
+
+    const processedWaterfall = simulatedWaterfall?.map((item, index, arr) => {
         let start = 0;
         if (item.type === 'total') {
             start = 0;
@@ -133,8 +229,9 @@ export const StrategicDashboard = () => {
                             <div>
                                 <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">Load Factor (PLF)</p>
                                 <div className="text-4xl font-bold text-slate-50 mt-1 tracking-tight">
-                                    {kpi?.loadFactor !== undefined ? `${kpi.loadFactor}%` : <Skeleton className="h-10 w-20 inline-block" />}
+                                    {displayedLoadFactor !== undefined ? `${displayedLoadFactor}%` : <Skeleton className="h-10 w-20 inline-block" />}
                                 </div>
+                                {simulationActive && <div className="mt-1 text-[10px] font-semibold text-emerald-400">Simulated from {kpi?.loadFactor}%</div>}
                             </div>
                             <div className="text-right">
                                 <div className="text-[10px] text-slate-600">Target</div>
@@ -144,16 +241,18 @@ export const StrategicDashboard = () => {
                         <div className="w-full bg-slate-800 h-2 rounded-full mt-4 overflow-hidden relative">
                             <div
                                 className={cn("h-full rounded-full transition-all duration-1000",
-                                    kpi?.loadFactor && kpi.loadFactor < 75 ? "bg-red-500" : "bg-emerald-500"
+                                    displayedLoadFactor && displayedLoadFactor < 75 ? "bg-red-500" : "bg-emerald-500"
                                 )}
-                                style={{ width: `${kpi?.loadFactor}%` }}
+                                style={{ width: `${displayedLoadFactor}%` }}
                             />
                             {/* Target Marker */}
                             <div className="absolute top-0 h-full w-0.5 bg-white" style={{ left: `${kpi?.targetLoadFactor}%` }} />
                         </div>
                         <div className="mt-2 text-xs text-slate-400 flex items-center gap-1">
-                            {kpi?.loadFactor && kpi.loadFactor < 75 ? <AlertCircle className="w-3 h-3 text-red-500" /> : null}
-                            {kpi?.loadFactor && kpi.loadFactor < 75 ? "Capacity spoilage risk detected" : "Utilization healthy"}
+                            {displayedLoadFactor && displayedLoadFactor < 75 ? <AlertCircle className="w-3 h-3 text-red-500" /> : null}
+                            {simulationActive
+                                ? `Scenario ${displayedLoadFactor && kpi?.targetLoadFactor && displayedLoadFactor >= kpi.targetLoadFactor ? 'reaches target band' : 'still needs demand capture'}`
+                                : displayedLoadFactor && displayedLoadFactor < 75 ? "Capacity spoilage risk detected" : "Utilization healthy"}
                         </div>
                     </CardContent>
                 </Card>
@@ -165,12 +264,13 @@ export const StrategicDashboard = () => {
                             <div>
                                 <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">RASK (Rev/ASK)</p>
                                 <div className="text-4xl font-bold text-slate-50 mt-1 tracking-tight">
-                                    {kpi?.rask !== undefined ? `${kpi.rask}¢` : <Skeleton className="h-10 w-20 inline-block" />}
+                                    {displayedRask !== undefined ? `${displayedRask}¢` : <Skeleton className="h-10 w-20 inline-block" />}
                                 </div>
+                                {simulationActive && <div className="mt-1 text-[10px] font-semibold text-emerald-400">Scenario-adjusted</div>}
                             </div>
-                            <div className={cn("flex items-center px-2 py-1 rounded text-xs font-bold", kpi?.raskTrend && kpi.raskTrend > 0 ? "bg-emerald-950 text-emerald-400" : "bg-red-950 text-red-400")}>
-                                {kpi?.raskTrend && kpi.raskTrend > 0 ? <ArrowUp className="w-3 h-3 mr-1" /> : <ArrowDown className="w-3 h-3 mr-1" />}
-                                {Math.abs(kpi?.raskTrend || 0)}%
+                            <div className={cn("flex items-center px-2 py-1 rounded text-xs font-bold", displayedRaskTrend && displayedRaskTrend > 0 ? "bg-emerald-950 text-emerald-400" : "bg-red-950 text-red-400")}>
+                                {displayedRaskTrend && displayedRaskTrend > 0 ? <ArrowUp className="w-3 h-3 mr-1" /> : <ArrowDown className="w-3 h-3 mr-1" />}
+                                {Math.abs(displayedRaskTrend || 0)}%
                             </div>
                         </div>
                         <div className="h-12 mt-4">
@@ -178,7 +278,7 @@ export const StrategicDashboard = () => {
                             <div className="w-full h-full flex items-end">
                                 <ResponsiveContainer width="100%" height={50}>
                                     <LineChart data={bookingCurve?.slice(0, 10) || []}>
-                                        <Line type="monotone" dataKey="actual" stroke={kpi?.raskTrend && kpi.raskTrend > 0 ? "#10b981" : "#ef4444"} strokeWidth={2} dot={false} isAnimationActive={false} />
+                                        <Line type="monotone" dataKey="actual" stroke={displayedRaskTrend && displayedRaskTrend > 0 ? "#10b981" : "#ef4444"} strokeWidth={2} dot={false} isAnimationActive={false} />
                                     </LineChart>
                                 </ResponsiveContainer>
                             </div>
@@ -194,11 +294,12 @@ export const StrategicDashboard = () => {
                             <div>
                                 <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">Yield</p>
                                 <div className="text-4xl font-bold text-slate-50 mt-1 tracking-tight">
-                                    {kpi?.yield !== undefined ? `${kpi.yield}¢` : <Skeleton className="h-10 w-20 inline-block" />}
+                                    {displayedYield !== undefined ? `${displayedYield}¢` : <Skeleton className="h-10 w-20 inline-block" />}
                                 </div>
+                                {simulationActive && <div className="mt-1 text-[10px] font-semibold text-amber-400">Includes stimulation mix</div>}
                             </div>
-                            <div className={cn("flex items-center px-2 py-1 rounded text-xs font-bold", kpi?.yieldTrend && kpi.yieldTrend > 0 ? "bg-emerald-950 text-emerald-400" : "bg-red-950 text-red-400")}>
-                                {kpi?.yieldTrend && kpi.yieldTrend > 0 ? "+" : ""}{kpi?.yieldTrend}%
+                            <div className={cn("flex items-center px-2 py-1 rounded text-xs font-bold", displayedYieldTrend && displayedYieldTrend > 0 ? "bg-emerald-950 text-emerald-400" : "bg-red-950 text-red-400")}>
+                                {displayedYieldTrend && displayedYieldTrend > 0 ? "+" : ""}{displayedYieldTrend}%
                             </div>
                         </div>
                         <div className="mt-4 flex gap-1">
@@ -299,7 +400,7 @@ export const StrategicDashboard = () => {
                     <CardContent className="flex-1 flex flex-col justify-center space-y-6">
                         <div className="space-y-4">
                             <div className="flex justify-between text-sm text-slate-300">
-                                <span>Price/Capacity Adjustment</span>
+                                <span>{scenario.label}</span>
                                 <span className="font-bold text-amber-400">+{upliftScenario}%</span>
                             </div>
                             <input
@@ -320,11 +421,12 @@ export const StrategicDashboard = () => {
                         <div className="bg-slate-950 p-4 rounded-lg border border-slate-800">
                             <div className="text-xs text-slate-400 mb-1">Projected Revenue Delta</div>
                             <div className="text-2xl font-bold text-emerald-400">
-                                + {formatCurrency((upliftScenario * 0.8) * 12500)}
+                                + {formatCurrency(scenario.revenueDelta)}
                             </div>
                             <p className="text-[10px] text-slate-500 mt-2 leading-tight">
-                                Based on current price elasticity of {selectedRoute === 'DOH-LOS' ? '-0.8 (Low)' : '-1.5 (High)'}.
-                                <br />Recommended action: {upliftScenario > 10 ? "Monitor for spill." : "Safe to implement."}
+                                Based on current price elasticity of {scenario.elasticityLabel}.
+                                <br />Recommended action: {scenario.action}.
+                                <br />{scenario.detail}
                             </p>
                         </div>
 

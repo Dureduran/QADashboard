@@ -12,6 +12,9 @@ test('dashboard navigation, actions, and RM assistant demo path work', async ({ 
   await page.getByRole('slider').fill('10');
   await page.getByRole('button', { name: /Apply Simulation/i }).click();
   await expect(page.getByText('Simulation Active')).toBeVisible();
+  await expect(page.getByText('Forecast Demand Uplift Scenario')).toBeVisible();
+  await expect(page.getByText('Simulated from 74%')).toBeVisible();
+  await expect(page.getByText('Scenario-adjusted')).toBeVisible();
 
   await page.getByRole('button', { name: 'Forecasting' }).click();
   await expect(page.getByText('Interactive Demand Forecasting')).toBeVisible();

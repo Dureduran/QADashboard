@@ -44,21 +44,31 @@ export const MOCK_BOOKING_CURVES: Record<string, BookingCurvePoint[]> = {
 };
 
 // 3. Competitor Price Analysis
-const generateCompetitorData = (basePrice: number) => {
-  return Array.from({ length: 7 }).map((_, i) => ({
-    date: new Date(Date.now() + i * 86400000).toLocaleDateString('en-US', { weekday: 'short' }),
-    ourPrice: basePrice + Math.floor(Math.random() * 100 - 50),
-    compPrice: basePrice + Math.floor(Math.random() * 150 - 75),
-    marketAverage: basePrice - 20,
-  }));
-};
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+const generateCompetitorData = (
+  basePrice: number,
+  ourOffsets: number[],
+  compOffsets: number[],
+  marketOffset = -20
+) => WEEKDAYS.map((date, i) => ({
+  date,
+  ourPrice: basePrice + ourOffsets[i],
+  compPrice: basePrice + compOffsets[i],
+  marketAverage: basePrice + marketOffset + Math.round((ourOffsets[i] + compOffsets[i]) / 4),
+}));
 
 export const MOCK_COMPETITOR_DATA: Record<string, CompetitorDataPoint[]> = {
-  'DOH-SFO': generateCompetitorData(1400),
-  'DOH-JFK': generateCompetitorData(1200),
-  'DOH-LOS': generateCompetitorData(1800),
-  'DOH-PVG': generateCompetitorData(900),
-  'DOH-ZAG': generateCompetitorData(750),
+  // Soft demand: QR stays slightly below the market to rebuild load without starting a price war.
+  'DOH-SFO': generateCompetitorData(1400, [-45, -40, -35, -30, -25, -20, -15], [10, 8, 5, 0, -5, -8, -10]),
+  // Mature/high-volume market: fares are stable with a mild weekend firming.
+  'DOH-JFK': generateCompetitorData(1200, [0, 5, 10, 12, 18, 22, 24], [-15, -12, -8, -5, 0, 4, 6]),
+  // High-yield but volatile: QR holds a premium while competitors soften late in the week.
+  'DOH-LOS': generateCompetitorData(1800, [90, 85, 80, 72, 65, 58, 50], [35, 25, 12, 0, -15, -25, -35], 10),
+  // Recovery/growth market: both QR and competitors step down tactically to stimulate demand.
+  'DOH-PVG': generateCompetitorData(900, [-20, -28, -36, -44, -52, -58, -62], [-10, -18, -28, -38, -48, -56, -60], -35),
+  // Thin seasonal route: disciplined, small moves around market average.
+  'DOH-ZAG': generateCompetitorData(750, [-5, -2, 0, 4, 8, 10, 12], [5, 4, 2, 0, -2, -3, -5]),
 };
 
 // 4. Profitability Decomposition (Waterfall)
