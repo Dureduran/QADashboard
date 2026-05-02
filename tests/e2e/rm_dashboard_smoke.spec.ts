@@ -26,6 +26,8 @@ test('dashboard navigation, actions, and RM assistant demo path work', async ({ 
   expect(monthPositions).toEqual([...monthPositions].sort((a, b) => a - b));
   await page.getByRole('button', { name: 'DOH-PVG' }).first().click();
   await expect(page.getByText('Price Sensitivity Matrix (DOH-PVG)')).toBeVisible();
+  await expect(page.getByText('Stimulate demand')).toBeVisible();
+  await expect(page.getByText('65% LF is 15 pts below 80% target')).toBeVisible();
   await page.getByRole('button', { name: 'Apply' }).click();
   await expect(page.getByRole('button', { name: /Applied/i })).toBeVisible();
 

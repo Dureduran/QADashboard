@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { useQuery } from '@tanstack/react-query';
-import { api } from '../../services/mockData';
+import {
+    api,
+    MOCK_ELASTICITY,
+    MOCK_NOSHOW_BY_ROUTE,
+    MOCK_OVERBOOKING,
+    MOCK_ROUTE_KPIS,
+} from '../../services/mockData';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
@@ -71,6 +77,68 @@ const getForecastSortKey = (point: { month: string; periodStart?: string }, inde
     return year * 12 + monthIndex;
 };
 
+const getBestElasticityMove = (route: string) => {
+    const curve = MOCK_ELASTICITY[route] || MOCK_ELASTICITY.DEFAULT;
+    return curve.reduce((best, point) => point.y > best.y ? point : best, curve[0]);
+};
+
+const getBestOverbookingMove = (route: string) => {
+    const curve = MOCK_OVERBOOKING[route] || MOCK_OVERBOOKING.DEFAULT;
+    return curve.reduce((best, point) => point.value > best.value ? point : best, curve[0]);
+};
+
+const getRouteForecastRecommendation = (route: string) => {
+    const kpi = MOCK_ROUTE_KPIS[route] || MOCK_ROUTE_KPIS['DOH-SFO'];
+    const elasticity = getBestElasticityMove(route);
+    const overbooking = getBestOverbookingMove(route);
+    const highNoShowRisk = (MOCK_NOSHOW_BY_ROUTE[route] || MOCK_NOSHOW_BY_ROUTE.DEFAULT).risk.find(item => item.name === 'High Risk')?.value || 0;
+    const loadGap = kpi.targetLoadFactor - kpi.loadFactor;
+    const priceMove = `${elasticity.x > 0 ? '+' : ''}${elasticity.x}%`;
+    const revenueMove = `${elasticity.y > 0 ? '+' : ''}${elasticity.y}%`;
+
+    if (route === 'DOH-LOS') {
+        return {
+            tone: 'amber',
+            title: 'Controlled demand capture',
+            action: 'Keep K/L/M open, avoid broad discounting, and use no-show/overbooking controls.',
+            reason: `${kpi.loadFactor}% LF is ${loadGap} pts below ${kpi.targetLoadFactor}% target, but yield is high at ${kpi.yield}c and no-show risk is ${highNoShowRisk}%.`,
+            visualSignal: `Best overbooking point: ${overbooking.name} ($${overbooking.value.toLocaleString()}).`,
+            toast: `Applied LOS plan: open low buckets, protect yield, monitor no-show risk.`,
+        };
+    }
+
+    if (loadGap >= 10) {
+        return {
+            tone: 'sky',
+            title: 'Stimulate demand',
+            action: 'Keep low buckets open and test tactical price stimulation before any closure.',
+            reason: `${kpi.loadFactor}% LF is ${loadGap} pts below ${kpi.targetLoadFactor}% target; elasticity visual favors ${priceMove} price for ${revenueMove} revenue response.`,
+            visualSignal: `Use forecast/heatmap demand pockets; review once load gap falls below 5 pts.`,
+            toast: `Applied ${route} stimulation plan: keep low buckets open and review tactical pricing.`,
+        };
+    }
+
+    if (loadGap > 0 && loadGap <= 5) {
+        return {
+            tone: 'emerald',
+            title: 'Selective protection',
+            action: 'Do not blanket-close K/L/M; protect only the lowest bucket if pickup beats forecast.',
+            reason: `${kpi.loadFactor}% LF is near the ${kpi.targetLoadFactor}% target, with RASK ${kpi.raskTrend > 0 ? '+' : ''}${kpi.raskTrend}% and yield ${kpi.yieldTrend > 0 ? '+' : ''}${kpi.yieldTrend}%.`,
+            visualSignal: `Overbooking visual peaks at ${overbooking.name}; keep analyst review before filing restrictions.`,
+            toast: `Applied ${route} selective plan: monitor pickup before protecting the lowest bucket.`,
+        };
+    }
+
+    return {
+        tone: 'emerald',
+        title: 'Protect fare integrity',
+        action: 'Review closing the lowest discount bucket, but keep corporate and high-yield availability protected.',
+        reason: `${kpi.loadFactor}% LF is at/above ${kpi.targetLoadFactor}% target and supports selective protection.`,
+        visualSignal: `Elasticity visual favors ${priceMove} price for ${revenueMove} revenue response.`,
+        toast: `Applied ${route} protection plan: selective low-bucket review.`,
+    };
+};
+
 export const DynamicPricingPanel = () => {
     const [selectedRoute, setSelectedRoute] = useState('DOH-SFO');
     const [applied, setApplied] = useState(false);
@@ -85,10 +153,21 @@ export const DynamicPricingPanel = () => {
     const forecastSeries = [...(data.forecast || [])].sort((a, b) => {
         return getForecastSortKey(a, 0) - getForecastSortKey(b, 0);
     });
+    const routeRecommendation = getRouteForecastRecommendation(selectedRoute);
+    const accentClass = routeRecommendation.tone === 'sky'
+        ? 'bg-sky-500'
+        : routeRecommendation.tone === 'amber'
+            ? 'bg-amber-500'
+            : 'bg-emerald-500';
+    const buttonClass = routeRecommendation.tone === 'sky'
+        ? 'bg-sky-900/40 text-sky-300 border-sky-800 hover:bg-sky-900/60'
+        : routeRecommendation.tone === 'amber'
+            ? 'bg-amber-900/40 text-amber-300 border-amber-800 hover:bg-amber-900/60'
+            : 'bg-emerald-900/40 text-emerald-400 border-emerald-800 hover:bg-emerald-900/60';
 
     const handleApply = () => {
         setApplied(true);
-        toast.success(`Recommendation applied: Increased J-class availability for ${selectedRoute}`);
+        toast.success(routeRecommendation.toast);
         setTimeout(() => setApplied(false), 2500);
     };
 
@@ -171,12 +250,13 @@ export const DynamicPricingPanel = () => {
                             </div>
 
                             {/* Recommendation Box */}
-                            <div className="w-full sm:w-48 bg-slate-800/50 p-3 rounded-lg border border-slate-700 flex flex-col justify-center relative overflow-hidden shrink-0">
-                                <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
+                            <div className="w-full sm:w-64 bg-slate-800/50 p-3 rounded-lg border border-slate-700 flex flex-col justify-center relative overflow-hidden shrink-0">
+                                <div className={cn("absolute top-0 left-0 w-1 h-full", accentClass)}></div>
                                 <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Recommended Action</div>
-                                <p className="text-xs text-slate-200 leading-relaxed">
-                                    Protect higher-yield inventory for {selectedRoute}; close K/L/M if pickup remains above baseline in the next snapshot.
-                                </p>
+                                <div className="text-xs font-semibold text-slate-100">{routeRecommendation.title}</div>
+                                <p className="mt-1 text-xs text-slate-200 leading-relaxed">{routeRecommendation.action}</p>
+                                <p className="mt-2 text-[10px] text-slate-400 leading-relaxed">{routeRecommendation.reason}</p>
+                                <p className="mt-1 text-[10px] text-slate-500 leading-relaxed">{routeRecommendation.visualSignal}</p>
                                 <div className="mt-2 flex justify-end">
                                     <button
                                         onClick={handleApply}
@@ -185,7 +265,7 @@ export const DynamicPricingPanel = () => {
                                             "text-[10px] px-2 py-1 rounded border transition-colors flex items-center gap-1",
                                             applied
                                                 ? "bg-emerald-600 text-white border-emerald-600"
-                                                : "bg-emerald-900/40 text-emerald-400 border-emerald-800 hover:bg-emerald-900/60"
+                                                : buttonClass
                                         )}
                                     >
                                         {applied ? (
