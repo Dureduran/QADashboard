@@ -3,11 +3,12 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, 
   BarChart, Bar, Legend, Cell, ComposedChart, Area, ScatterChart, Scatter, ReferenceLine
 } from 'recharts';
 import { AlertCircle, ArrowUp, ArrowDown, CheckCircle2, FileText, Lightbulb, Zap } from 'lucide-react';
 import { cn, formatCurrency } from '../../lib/utils';
+import { ChartTooltip as Tooltip } from './ChartTooltip';
 
 interface SpecData {
   title: string;

@@ -3,8 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/mockData';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend
+  LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, Legend
 } from 'recharts';
+import { ChartTooltip as Tooltip } from './ChartTooltip';
 
 export const RevenueChart = () => {
   const { data, isLoading } = useQuery({

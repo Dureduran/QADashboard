@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 import { ArrowUpRight, Filter, DollarSign, Check, Loader2 } from 'lucide-react';
 import { RouteSelector } from './RouteSelector';
 import { cn } from '../../lib/utils';
@@ -8,6 +8,7 @@ import { ModuleExplanation } from './ModuleExplanation';
 import { useToast } from '../ui/Toast';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/mockData';
+import { ChartTooltip as Tooltip } from './ChartTooltip';
 
 export const UnconstrainingPanel = () => {
     const [selectedRoute, setSelectedRoute] = useState('DOH-LOS');

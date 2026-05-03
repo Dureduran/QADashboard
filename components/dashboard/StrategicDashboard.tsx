@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/mockData';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+    LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
     BarChart, Bar, Legend, Cell, ComposedChart, Area, ScatterChart, Scatter, ReferenceLine
 } from 'recharts';
 import { ArrowUp, ArrowDown, Target, TrendingUp, Users, AlertCircle, DollarSign, ShieldAlert, Activity, Check, Loader2 } from 'lucide-react';
@@ -11,6 +11,7 @@ import { cn, formatCurrency } from '../../lib/utils';
 import { Button } from '../ui/Button';
 import { Skeleton } from '../ui/Skeleton';
 import { useToast } from '../ui/Toast';
+import { ChartTooltip as Tooltip } from './ChartTooltip';
 
 const ROUTES = ['DOH-SFO', 'DOH-JFK', 'DOH-LOS', 'DOH-PVG', 'DOH-ZAG'];
 

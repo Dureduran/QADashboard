@@ -9,13 +9,14 @@ import {
     MOCK_ROUTE_KPIS,
 } from '../../services/mockData';
 import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+    LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer
 } from 'recharts';
 import { Calendar, Check } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { RouteSelector } from './RouteSelector';
 import { ModuleExplanation } from './ModuleExplanation';
 import { useToast } from '../ui/Toast';
+import { ChartTooltip as Tooltip } from './ChartTooltip';
 
 const HeatmapCell: React.FC<{ value: number }> = ({ value }) => {
     // Red to Green gradient simulation

@@ -4,12 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../services/mockData';
 import {
-    PieChart, Pie, Cell, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+    PieChart, Pie, Cell, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, ResponsiveContainer
 } from 'recharts';
 import { Calendar } from 'lucide-react';
 import { RouteSelector } from './RouteSelector';
 import { ModuleExplanation } from './ModuleExplanation';
 import { formatCurrency } from '../../lib/utils';
+import { ChartTooltip as Tooltip } from './ChartTooltip';
 
 // Simple SVG Gauge Component
 const Gauge = ({ seats, value, riskLabel }: { seats: number; value: number; riskLabel: string }) => {
@@ -45,6 +46,7 @@ const Gauge = ({ seats, value, riskLabel }: { seats: number; value: number; risk
 
 export const NoShowPanel = () => {
     const [selectedRoute, setSelectedRoute] = useState('DOH-JFK');
+    const [activeRisk, setActiveRisk] = useState<{ name: string; value: number } | null>(null);
 
     const { data: noShowData, isLoading } = useQuery({
         queryKey: ['noShowData', selectedRoute],
@@ -90,7 +92,14 @@ export const NoShowPanel = () => {
                         <p className="text-[10px] text-slate-500 text-center mb-1 max-w-xs">
                             Share of PNRs grouped by predicted no-show probability from passenger, ticket, and route history.
                         </p>
-                        <div className="flex-1 w-full min-h-[100px] relative">
+                        <div
+                            className="qa-risk-chart flex-1 w-full min-h-[100px] relative"
+                            onMouseEnter={() => {
+                                const mediumRisk = data.risk.find(item => item.name === 'Medium Risk') || data.risk[0];
+                                if (mediumRisk) setActiveRisk({ name: mediumRisk.name, value: mediumRisk.value });
+                            }}
+                            onMouseLeave={() => setActiveRisk(null)}
+                        >
                             <ResponsiveContainer width="100%" height={120}>
                                 <PieChart>
                                     <Pie
@@ -102,14 +111,24 @@ export const NoShowPanel = () => {
                                         paddingAngle={2}
                                         dataKey="value"
                                         isAnimationActive={false}
+                                        onMouseEnter={(entry: any) => setActiveRisk({ name: entry.name, value: entry.value })}
+                                        onMouseLeave={() => setActiveRisk(null)}
                                     >
                                         {data?.risk.map((entry: any, index: number) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                                            <Cell
+                                                key={`cell-${index}`}
+                                                fill={entry.color}
+                                                stroke="none"
+                                            />
                                         ))}
                                     </Pie>
-                                    <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '4px', fontSize: '11px' }} />
                                 </PieChart>
                             </ResponsiveContainer>
+                            {activeRisk && (
+                                <div className="qa-chart-tooltip pointer-events-none absolute right-6 top-8 rounded-md border border-slate-600 bg-slate-950 px-3 py-2 text-xs font-medium text-slate-50 shadow-xl shadow-slate-950/40">
+                                    {activeRisk.name}: {activeRisk.value}
+                                </div>
+                            )}
                         </div>
                         <div className="flex justify-center gap-3 mt-1">
                             {data?.risk.map((item: any) => (
