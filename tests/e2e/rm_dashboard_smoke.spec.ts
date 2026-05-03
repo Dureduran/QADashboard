@@ -38,6 +38,11 @@ test('dashboard navigation, actions, and RM assistant demo path work', async ({ 
   await expect(page.getByText('Overbooking & No-Show Optimizer')).toBeVisible();
   await page.getByRole('button', { name: 'DOH-ZAG' }).first().click();
   await expect(page.getByText(/NO-SHOW PREDICTION & OPTIMIZER/)).toBeVisible();
+  await page.locator('.recharts-pie-sector').first().hover();
+  await expect(page.locator('.recharts-default-tooltip').first()).toBeVisible();
+  await expect.poll(async () => {
+    return page.locator('.recharts-tooltip-item').first().evaluate(element => getComputedStyle(element).color);
+  }).toBe('rgb(248, 250, 252)');
 
   await page.getByRole('button', { name: 'Pricing Optimizer' }).click();
   await expect(page.getByText('Real-Time Demand Unconstraining & Pricing')).toBeVisible();
