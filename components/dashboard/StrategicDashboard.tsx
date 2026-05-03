@@ -99,7 +99,6 @@ export const StrategicDashboard = () => {
     const [upliftScenario, setUpliftScenario] = useState(0); // 0% to 15%
     const [isApplying, setIsApplying] = useState(false);
     const [simulationActive, setSimulationActive] = useState(false);
-    const [bookingTooltipOpen, setBookingTooltipOpen] = useState(false);
     const toast = useToast();
 
     const { data: kpi } = useQuery({
@@ -277,11 +276,11 @@ export const StrategicDashboard = () => {
                             </div>
                         </div>
                         <div className="h-12 mt-4">
-                            {/* Simulated Mini Trend */}
                             <div className="w-full h-full flex items-end">
                                 <ResponsiveContainer width="100%" height={50}>
                                     <LineChart data={bookingCurve?.slice(0, 10) || []}>
-                                        <Line type="monotone" dataKey="actual" stroke={displayedRaskTrend && displayedRaskTrend > 0 ? "#10b981" : "#ef4444"} strokeWidth={2} dot={false} isAnimationActive={false} />
+                                        <Tooltip formatter={(value: any) => [`${Number(value).toFixed(2)}¢`, 'RASK']} />
+                                        <Line type="monotone" dataKey="actual" name="RASK" stroke={displayedRaskTrend && displayedRaskTrend > 0 ? "#10b981" : "#ef4444"} strokeWidth={2} dot={false} activeDot={{ r: 4 }} isAnimationActive={false} />
                                     </LineChart>
                                 </ResponsiveContainer>
                             </div>
@@ -328,17 +327,13 @@ export const StrategicDashboard = () => {
                         <CardTitle className="text-sm font-medium text-slate-300">Booking Pace</CardTitle>
                         <p className="text-[10px] text-slate-500">Cumulative bookings vs Forecast & Last Year</p>
                     </CardHeader>
-                    <CardContent
-                        className="qa-booking-pace-chart relative flex-1 min-h-0"
-                        onMouseEnter={() => setBookingTooltipOpen(true)}
-                        onMouseLeave={() => setBookingTooltipOpen(false)}
-                    >
+                    <CardContent className="qa-booking-pace-chart relative flex-1 min-h-0">
                         <ResponsiveContainer width="100%" height={280}>
                             <ComposedChart data={processedBookingCurve || []} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                                 <XAxis dataKey="daysOut" label={{ value: 'Days Out', position: 'insideBottomRight', offset: -5, fontSize: 10 }} stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
                                 <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
-                                <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155' }} />
+                                <Tooltip formatter={(value: any) => [`${Number(value).toLocaleString()} bookings`, undefined]} />
                                 <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
                                 <Area type="monotone" dataKey="actual" name="Actual (2026)" fill="url(#colorActual)" stroke="#8b0050" strokeWidth={3} isAnimationActive={false} />
                                 <Line type="monotone" dataKey="forecast" name="Forecast" stroke="#fbbf24" strokeWidth={2} strokeDasharray="5 5" dot={false} isAnimationActive={false} />
@@ -364,25 +359,6 @@ export const StrategicDashboard = () => {
                                 </defs>
                             </ComposedChart>
                         </ResponsiveContainer>
-                        {bookingTooltipOpen && (
-                            <div className="qa-recharts-tooltip pointer-events-none absolute right-6 top-4 rounded-md border border-slate-600 bg-slate-950 px-3 py-2 text-xs text-slate-50 shadow-xl shadow-slate-950/40">
-                                <div className="mb-1 font-semibold text-slate-50">Booking pace</div>
-                                <div className="space-y-1">
-                                    <div className="flex items-center justify-between gap-4 text-slate-50">
-                                        <span>Actual</span>
-                                        <span className="font-semibold">{processedBookingCurve?.at(-1)?.actual ?? '-'} bookings</span>
-                                    </div>
-                                    <div className="flex items-center justify-between gap-4 text-slate-50">
-                                        <span>Forecast</span>
-                                        <span className="font-semibold">{processedBookingCurve?.at(-1)?.forecast ?? '-'} bookings</span>
-                                    </div>
-                                    <div className="flex items-center justify-between gap-4 text-slate-50">
-                                        <span>Last Year</span>
-                                        <span className="font-semibold">{processedBookingCurve?.at(-1)?.ly ?? '-'} bookings</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                     </CardContent>
                 </Card>
 
@@ -568,10 +544,13 @@ export const StrategicDashboard = () => {
                             <BarChart data={overbooking || []} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                                 <XAxis dataKey="name" stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} />
+                                <YAxis stroke="#64748b" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155' }}
                                     cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                                    formatter={(value: any) => {
+                                        const v = Number(value);
+                                        return [`${v >= 0 ? '+' : '-'}$${Math.abs(v).toLocaleString()}`, 'Net Revenue'];
+                                    }}
                                 />
                                 <ReferenceLine y={0} stroke="#475569" />
                                 <Bar dataKey="value" isAnimationActive={false}>

@@ -13,17 +13,22 @@ export function ChartTooltip<TValue extends number | string, TName extends numbe
           <div className="mb-1 font-semibold text-slate-50">{label}</div>
         )}
         <div className="space-y-1">
-          {payload.map((item: any, index: number) => (
-            <div key={`${item.dataKey || item.name || 'series'}-${index}`} className="flex items-center justify-between gap-4 text-slate-50">
-              <span className="flex items-center gap-1.5 text-slate-50">
-                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color || item.stroke || '#94a3b8' }} />
-                {item.name || item.dataKey}
-              </span>
-              <span className="font-semibold text-slate-50">
-                {item.value}{item.unit || ''}
-              </span>
-            </div>
-          ))}
+          {payload.map((item: any, index: number) => {
+            let display: React.ReactNode = `${item.value != null ? item.value : '—'}${item.unit || ''}`;
+            if (props.formatter) {
+              const result = (props.formatter as any)(item.value, item.name, item, index, payload);
+              display = Array.isArray(result) ? result[0] : result;
+            }
+            return (
+              <div key={`${item.dataKey || item.name || 'series'}-${index}`} className="flex items-center justify-between gap-4 text-slate-50">
+                <span className="flex items-center gap-1.5 text-slate-50">
+                  <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: item.color || item.stroke || item.fill || '#94a3b8' }} />
+                  {item.name || item.dataKey}
+                </span>
+                <span className="font-semibold text-slate-50">{display}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
     );
@@ -33,7 +38,7 @@ export function ChartTooltip<TValue extends number | string, TName extends numbe
     <Tooltip
       {...props}
       content={props.content || defaultContent}
-      wrapperStyle={{ outline: 'none', pointerEvents: 'none', ...props.wrapperStyle }}
+      wrapperStyle={{ outline: 'none', pointerEvents: 'none', zIndex: 50, ...props.wrapperStyle }}
     />
   );
 }

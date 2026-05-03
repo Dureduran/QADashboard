@@ -150,9 +150,23 @@ export const NoShowPanel = () => {
                             <ResponsiveContainer width="100%" height={120}>
                                 <ScatterChart margin={{ top: 5, right: 5, bottom: 0, left: -10 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" horizontal={true} vertical={false} />
-                                    <XAxis type="number" dataKey="x" name="Prob" stroke="#64748b" fontSize={9} tickLine={false} axisLine={false} domain={[0, 1]} />
-                                    <YAxis type="number" dataKey="y" name="Value" stroke="#64748b" fontSize={9} tickLine={false} axisLine={false} />
-                                    <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', fontSize: '11px' }} />
+                                    <XAxis type="number" dataKey="x" name="No-Show Risk" stroke="#64748b" fontSize={9} tickLine={false} axisLine={false} domain={[0, 1]} tickFormatter={(v) => `${Math.round(v * 100)}%`} />
+                                    <YAxis type="number" dataKey="y" name="Fare Value" stroke="#64748b" fontSize={9} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} />
+                                    <Tooltip
+                                        cursor={{ strokeDasharray: '3 3' }}
+                                        content={({ active, payload }) => {
+                                            if (!active || !payload?.length) return null;
+                                            const d = payload[0]?.payload;
+                                            return (
+                                                <div className="rounded-md border border-slate-600 bg-slate-950 px-3 py-2 text-xs text-slate-50 shadow-xl">
+                                                    <div className="space-y-1">
+                                                        <div className="flex justify-between gap-4"><span className="text-slate-400">No-Show Risk</span><span className="font-semibold">{Math.round(d?.x * 100)}%</span></div>
+                                                        <div className="flex justify-between gap-4"><span className="text-slate-400">Fare Value</span><span className="font-semibold">${d?.y?.toLocaleString()}</span></div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        }}
+                                    />
                                     <Scatter name="Passengers" data={data?.scatter || []} fill="#8884d8" isAnimationActive={false}>
                                         {data?.scatter.map((entry: any, index: number) => (
                                             <Cell key={`cell-${index}`} fill={entry.fill} fillOpacity={0.7} />
