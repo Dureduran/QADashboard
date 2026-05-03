@@ -63,23 +63,7 @@ export const UnconstrainingPanel = () => {
                                 <YAxis stroke="#64748b" tickLine={false} axisLine={false} />
                                 <Tooltip
                                     cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                                    content={({ active, payload, label }) => {
-                                        if (!active || !payload?.length) return null;
-                                        return (
-                                            <div className="rounded-md border border-slate-600 bg-slate-950 px-3 py-2 text-xs text-slate-50 shadow-xl">
-                                                <div className="mb-1 font-semibold">Fare: ${label}</div>
-                                                {payload.map((item: any, i: number) => (
-                                                    <div key={i} className="flex items-center justify-between gap-4">
-                                                        <span className="flex items-center gap-1.5">
-                                                            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: item.fill || item.color }} />
-                                                            {item.name}
-                                                        </span>
-                                                        <span className="font-semibold">{item.value} pax</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        );
-                                    }}
+                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc' }}
                                 />
                                 <Legend wrapperStyle={{ paddingTop: '20px' }} />
                                 <Bar dataKey="bookings" name="Constrained (Actual Bookings)" fill="#3b82f6" stackId="a" radius={[0, 0, 4, 4]} isAnimationActive={false} />

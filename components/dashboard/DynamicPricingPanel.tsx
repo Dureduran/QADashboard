@@ -19,6 +19,7 @@ import { useToast } from '../ui/Toast';
 import { ChartTooltip as Tooltip } from './ChartTooltip';
 
 const HeatmapCell: React.FC<{ value: number }> = ({ value }) => {
+    // Red to Green gradient simulation
     let bgClass = "bg-red-500";
     if (value > 80) bgClass = "bg-emerald-500";
     else if (value > 60) bgClass = "bg-emerald-400";
@@ -26,24 +27,39 @@ const HeatmapCell: React.FC<{ value: number }> = ({ value }) => {
     else if (value > 20) bgClass = "bg-orange-400";
 
     return (
-        <div className="relative group">
-            <div
-                className={cn("h-6 w-full rounded-sm transition-all hover:ring-2 hover:ring-white/40 cursor-default", bgClass)}
-                aria-label={`Demand level: ${value}%`}
-            />
-            <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 whitespace-nowrap rounded border border-slate-600 bg-slate-950 px-2 py-1 text-[10px] font-semibold text-slate-50 shadow-xl">
-                Demand: {value}%
-                <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-600" />
-            </div>
-        </div>
+        <div
+            className={cn("h-6 w-full rounded-sm transition-all hover:opacity-80 cursor-default", bgClass)}
+            title={`Demand: ${value}% — View only`}
+            aria-label={`Demand level: ${value}%`}
+        />
     );
 };
 
 const MONTH_INDEX: Record<string, number> = {
-    jan: 0, january: 0, feb: 1, february: 1, mar: 2, march: 2,
-    apr: 3, april: 3, may: 4, jun: 5, june: 5, jul: 6, july: 6,
-    aug: 7, august: 7, sep: 8, sept: 8, september: 8,
-    oct: 9, october: 9, nov: 10, november: 10, dec: 11, december: 11,
+    jan: 0,
+    january: 0,
+    feb: 1,
+    february: 1,
+    mar: 2,
+    march: 2,
+    apr: 3,
+    april: 3,
+    may: 4,
+    jun: 5,
+    june: 5,
+    jul: 6,
+    july: 6,
+    aug: 7,
+    august: 7,
+    sep: 8,
+    sept: 8,
+    september: 8,
+    oct: 9,
+    october: 9,
+    nov: 10,
+    november: 10,
+    dec: 11,
+    december: 11,
 };
 
 const getForecastSortKey = (point: { month: string; periodStart?: string }, index: number) => {
@@ -51,10 +67,13 @@ const getForecastSortKey = (point: { month: string; periodStart?: string }, inde
         const parsedDate = new Date(point.periodStart);
         if (!Number.isNaN(parsedDate.getTime())) return parsedDate.getTime();
     }
+
     const monthMatch = point.month.match(/([A-Za-z]+)\s*(\d{4})?/);
     if (!monthMatch) return Number.MAX_SAFE_INTEGER + index;
+
     const monthIndex = MONTH_INDEX[monthMatch[1].toLowerCase()];
     if (monthIndex === undefined) return Number.MAX_SAFE_INTEGER + index;
+
     const year = monthMatch[2] ? Number(monthMatch[2]) : 2026;
     return year * 12 + monthIndex;
 };
@@ -80,33 +99,40 @@ const getRouteForecastRecommendation = (route: string) => {
 
     if (route === 'DOH-LOS') {
         return {
-            tone: 'amber', title: 'Controlled demand capture',
+            tone: 'amber',
+            title: 'Controlled demand capture',
             action: 'Keep K/L/M open, avoid broad discounting, and use no-show/overbooking controls.',
             reason: `${kpi.loadFactor}% LF is ${loadGap} pts below ${kpi.targetLoadFactor}% target, but yield is high at ${kpi.yield}c and no-show risk is ${highNoShowRisk}%.`,
             visualSignal: `Best overbooking point: ${overbooking.name} ($${overbooking.value.toLocaleString()}).`,
             toast: `Applied LOS plan: open low buckets, protect yield, monitor no-show risk.`,
         };
     }
+
     if (loadGap >= 10) {
         return {
-            tone: 'sky', title: 'Stimulate demand',
+            tone: 'sky',
+            title: 'Stimulate demand',
             action: 'Keep low buckets open and test tactical price stimulation before any closure.',
-            reason: `${kpi.loadFactor}% LF is ${loadGap} pts below ${kpi.targetLoadFactor}% target; elasticity favors ${priceMove} price for ${revenueMove} revenue response.`,
+            reason: `${kpi.loadFactor}% LF is ${loadGap} pts below ${kpi.targetLoadFactor}% target; elasticity visual favors ${priceMove} price for ${revenueMove} revenue response.`,
             visualSignal: `Use forecast/heatmap demand pockets; review once load gap falls below 5 pts.`,
             toast: `Applied ${route} stimulation plan: keep low buckets open and review tactical pricing.`,
         };
     }
+
     if (loadGap > 0 && loadGap <= 5) {
         return {
-            tone: 'emerald', title: 'Selective protection',
+            tone: 'emerald',
+            title: 'Selective protection',
             action: 'Do not blanket-close K/L/M; protect only the lowest bucket if pickup beats forecast.',
             reason: `${kpi.loadFactor}% LF is near the ${kpi.targetLoadFactor}% target, with RASK ${kpi.raskTrend > 0 ? '+' : ''}${kpi.raskTrend}% and yield ${kpi.yieldTrend > 0 ? '+' : ''}${kpi.yieldTrend}%.`,
             visualSignal: `Overbooking visual peaks at ${overbooking.name}; keep analyst review before filing restrictions.`,
             toast: `Applied ${route} selective plan: monitor pickup before protecting the lowest bucket.`,
         };
     }
+
     return {
-        tone: 'emerald', title: 'Protect fare integrity',
+        tone: 'emerald',
+        title: 'Protect fare integrity',
         action: 'Review closing the lowest discount bucket, but keep corporate and high-yield availability protected.',
         reason: `${kpi.loadFactor}% LF is at/above ${kpi.targetLoadFactor}% target and supports selective protection.`,
         visualSignal: `Elasticity visual favors ${priceMove} price for ${revenueMove} revenue response.`,
@@ -156,6 +182,7 @@ export const DynamicPricingPanel = () => {
                         <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-100 flex items-center gap-2">
                             1. DYNAMIC PRICING & DEMAND FORECASTING <span className="text-slate-500 font-normal hidden sm:inline">({selectedRoute})</span>
                         </CardTitle>
+
                         <div className="flex flex-col sm:flex-row gap-3 items-end sm:items-center">
                             <RouteSelector selectedRoute={selectedRoute} onSelect={setSelectedRoute} size="sm" />
                             <div className="flex items-center gap-2 bg-slate-950 border border-slate-700 rounded px-2 py-1 h-[26px]">
@@ -168,6 +195,7 @@ export const DynamicPricingPanel = () => {
                 </CardHeader>
 
                 <CardContent className="flex-1 p-4 flex flex-col gap-4 min-h-0">
+                    {/* Top Chart Section - Fixed explicit height for ResponsiveContainer */}
                     <div className="h-[220px] w-full relative border-b border-slate-800/50 pb-2">
                         <div className="absolute top-0 right-0 flex items-center gap-4 text-[10px] z-10 bg-slate-900/80 px-2 rounded">
                             <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-slate-400"></div>Historical</div>
@@ -178,28 +206,36 @@ export const DynamicPricingPanel = () => {
                             <LineChart data={forecastSeries} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                                 <XAxis dataKey="month" stroke="#64748b" fontSize={10} axisLine={false} tickLine={false} />
-                                <YAxis stroke="#64748b" fontSize={10} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
-                                <Tooltip formatter={(value: any) => [`$${Number(value).toLocaleString()}`, undefined]} />
-                                <Line type="monotone" dataKey="historical" name="Historical" stroke="#94a3b8" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                                <Line type="monotone" dataKey="forecast" name="Forecast" stroke="#be185d" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                                <Line type="monotone" dataKey="optimal" name="Optimal" stroke="#cbd5e1" strokeDasharray="4 4" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                                <YAxis stroke="#64748b" fontSize={10} axisLine={false} tickLine={false} />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc', fontSize: '12px' }}
+                                />
+                                <Line type="monotone" dataKey="historical" stroke="#94a3b8" strokeWidth={2} dot={{ r: 3 }} />
+                                <Line type="monotone" dataKey="forecast" stroke="#be185d" strokeWidth={2} dot={{ r: 3 }} />
+                                <Line type="monotone" dataKey="optimal" stroke="#cbd5e1" strokeDasharray="4 4" strokeWidth={2} dot={{ r: 3 }} />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
 
+                    {/* Bottom Heatmap Section - Fixed size at bottom */}
                     <div className="flex flex-col gap-2 shrink-0">
                         <div className="text-xs font-semibold text-slate-300 flex justify-between">
                             <span>Price Sensitivity Matrix ({selectedRoute})</span>
                         </div>
+
                         <div className="flex flex-col sm:flex-row gap-4">
+                            {/* Heatmap Grid */}
                             <div className="flex-1 bg-slate-950/50 p-3 rounded-lg border border-slate-800 overflow-x-auto">
                                 <div className="min-w-[300px] grid grid-cols-[70px_1fr] gap-2">
+                                    {/* Headers */}
                                     <div className="text-[10px] text-slate-500 flex flex-col justify-end pb-1">Segment</div>
                                     <div className="grid grid-cols-8 gap-1 text-center">
                                         {[10, 20, 30, 40, 50, 60, 70, 80].map(p => (
                                             <div key={p} className="text-[10px] text-slate-500">{p}</div>
                                         ))}
                                     </div>
+
+                                    {/* Rows */}
                                     {data?.matrix.map((row: any) => (
                                         <React.Fragment key={row.segment}>
                                             <div className="text-[10px] text-slate-400 font-medium flex items-center">{row.segment}</div>
@@ -214,6 +250,7 @@ export const DynamicPricingPanel = () => {
                                 </div>
                             </div>
 
+                            {/* Recommendation Box */}
                             <div className="w-full sm:w-64 bg-slate-800/50 p-3 rounded-lg border border-slate-700 flex flex-col justify-center relative overflow-hidden shrink-0">
                                 <div className={cn("absolute top-0 left-0 w-1 h-full", accentClass)}></div>
                                 <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Recommended Action</div>
@@ -227,10 +264,17 @@ export const DynamicPricingPanel = () => {
                                         disabled={applied}
                                         className={cn(
                                             "text-[10px] px-2 py-1 rounded border transition-colors flex items-center gap-1",
-                                            applied ? "bg-emerald-600 text-white border-emerald-600" : buttonClass
+                                            applied
+                                                ? "bg-emerald-600 text-white border-emerald-600"
+                                                : buttonClass
                                         )}
                                     >
-                                        {applied ? <><Check className="w-3 h-3" />Applied</> : "Apply"}
+                                        {applied ? (
+                                            <>
+                                                <Check className="w-3 h-3" />
+                                                Applied
+                                            </>
+                                        ) : "Apply"}
                                     </button>
                                 </div>
                             </div>
@@ -250,7 +294,7 @@ export const DynamicPricingPanel = () => {
                     "Macro-economic indicators (GDP, Fuel)"
                 ]}
                 model={[
-                    "LSTM Recurrent Neural Networks: Captures non-linear dependencies in booking sequences.",
+                    "LSTM Recurrent Neural Networks: Captures non-linear dependencies in booking sequences (e.g., how a spike today affects bookings 3 days later).",
                     "Prophet Decomposition: Isolates holiday effects (Eid, Christmas) and seasonal trends from underlying growth.",
                     "Real-Time Elasticity Scoring: Dynamically adjusts price sensitivity parameters based on current competitive fare position."
                 ]}
