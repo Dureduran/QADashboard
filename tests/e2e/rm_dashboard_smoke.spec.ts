@@ -15,6 +15,12 @@ test('dashboard navigation, actions, and RM assistant demo path work', async ({ 
   await expect(page.getByText('Forecast Demand Uplift Scenario')).toBeVisible();
   await expect(page.getByText('Simulated from 74%')).toBeVisible();
   await expect(page.getByText('Scenario-adjusted')).toBeVisible();
+  await page.locator('.qa-booking-pace-chart').scrollIntoViewIfNeeded();
+  await page.locator('.qa-booking-pace-chart').hover();
+  const sCurveTooltip = page.locator('.qa-recharts-tooltip');
+  await expect(sCurveTooltip).toBeVisible();
+  await expect(sCurveTooltip).toHaveCSS('color', 'rgb(248, 250, 252)');
+  await expect(sCurveTooltip).toContainText(/Actual|Forecast|Last Year/);
 
   await page.getByRole('button', { name: 'Forecasting' }).click();
   await expect(page.getByText('Interactive Demand Forecasting')).toBeVisible();

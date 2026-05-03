@@ -99,6 +99,7 @@ export const StrategicDashboard = () => {
     const [upliftScenario, setUpliftScenario] = useState(0); // 0% to 15%
     const [isApplying, setIsApplying] = useState(false);
     const [simulationActive, setSimulationActive] = useState(false);
+    const [bookingTooltipOpen, setBookingTooltipOpen] = useState(false);
     const toast = useToast();
 
     const { data: kpi } = useQuery({
@@ -327,7 +328,11 @@ export const StrategicDashboard = () => {
                         <CardTitle className="text-sm font-medium text-slate-300">Booking Pace</CardTitle>
                         <p className="text-[10px] text-slate-500">Cumulative bookings vs Forecast & Last Year</p>
                     </CardHeader>
-                    <CardContent className="flex-1 min-h-0">
+                    <CardContent
+                        className="qa-booking-pace-chart relative flex-1 min-h-0"
+                        onMouseEnter={() => setBookingTooltipOpen(true)}
+                        onMouseLeave={() => setBookingTooltipOpen(false)}
+                    >
                         <ResponsiveContainer width="100%" height={280}>
                             <ComposedChart data={processedBookingCurve || []} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
@@ -359,6 +364,25 @@ export const StrategicDashboard = () => {
                                 </defs>
                             </ComposedChart>
                         </ResponsiveContainer>
+                        {bookingTooltipOpen && (
+                            <div className="qa-recharts-tooltip pointer-events-none absolute right-6 top-4 rounded-md border border-slate-600 bg-slate-950 px-3 py-2 text-xs text-slate-50 shadow-xl shadow-slate-950/40">
+                                <div className="mb-1 font-semibold text-slate-50">Booking pace</div>
+                                <div className="space-y-1">
+                                    <div className="flex items-center justify-between gap-4 text-slate-50">
+                                        <span>Actual</span>
+                                        <span className="font-semibold">{processedBookingCurve?.at(-1)?.actual ?? '-'} bookings</span>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-4 text-slate-50">
+                                        <span>Forecast</span>
+                                        <span className="font-semibold">{processedBookingCurve?.at(-1)?.forecast ?? '-'} bookings</span>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-4 text-slate-50">
+                                        <span>Last Year</span>
+                                        <span className="font-semibold">{processedBookingCurve?.at(-1)?.ly ?? '-'} bookings</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 
