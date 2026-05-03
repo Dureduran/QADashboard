@@ -120,24 +120,39 @@
       overflow: hidden;
     }
 
-    /* Recharts defaults black tooltip text, which disappears on the dark dashboard. */
-    .recharts-tooltip-wrapper,
+    /* Recharts tooltip styling - dark theme for the dashboard */
     .recharts-default-tooltip {
       background: #0f172a !important;
-      border: 1px solid #334155 !important;
+      border: 1px solid #475569 !important;
       border-radius: 6px !important;
-      color: #f8fafc !important;
-      box-shadow: 0 12px 30px rgba(2, 6, 23, 0.35);
+      box-shadow: 0 12px 30px rgba(2, 6, 23, 0.6) !important;
+      padding: 8px 12px !important;
+      font-size: 12px !important;
     }
 
-    .recharts-tooltip-wrapper *,
-    .recharts-tooltip-label,
+    .recharts-tooltip-wrapper {
+      z-index: 9999 !important;
+      outline: none !important;
+    }
+
+    .recharts-tooltip-label {
+      color: #94a3b8 !important;
+      font-weight: 600 !important;
+      margin-bottom: 4px !important;
+    }
+
     .recharts-tooltip-item,
     .recharts-tooltip-item-name,
     .recharts-tooltip-item-separator,
     .recharts-tooltip-item-value,
     .recharts-tooltip-item-unit {
       color: #f8fafc !important;
+    }
+
+    .recharts-tooltip-cursor {
+      stroke: #64748b !important;
+      stroke-width: 1 !important;
+      stroke-dasharray: 3 3 !important;
     }
   </style>
   <script type="importmap">
