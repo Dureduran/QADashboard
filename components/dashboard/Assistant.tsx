@@ -113,8 +113,10 @@ const INITIAL_METRICS: AIResponse = {
 
 const QUICK_PROMPTS = [
     'Should we close K/L/M on DOH-SFO?',
+    'How should we protect DOH-JFK?',
     'What should we do on DOH-PVG?',
     'How should we handle DOH-LOS?',
+    'What is the right action for DOH-ZAG?',
     'Give recommendations for all dashboard routes.',
     'What if competitor fare data is stale for DOH-SFO?',
 ];

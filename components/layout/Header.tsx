@@ -33,6 +33,8 @@ export const Header = ({ onMenuClick }: HeaderProps) => {
             size="icon"
             onClick={onMenuClick}
             className="h-8 w-8 md:hidden"
+            title="Open navigation"
+            aria-label="Open navigation"
          >
             <Menu className="h-5 w-5 text-slate-400" />
          </Button>

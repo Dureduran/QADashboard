@@ -59,9 +59,9 @@ const SCHEMAS = [
         sample: [
             {
                 "scrape_date": "2026-01-28",
-                "route_od": "DOH-BKK",
+                "route_od": "DOH-SFO",
                 "airline_code": "EK",
-                "flight_number": "EK372",
+                "flight_number": "EK225",
                 "departure_time_local": "09:45",
                 "lowest_economy_usd": 680,
                 "lowest_business_usd": 2100,
@@ -70,9 +70,9 @@ const SCHEMAS = [
             },
             {
                 "scrape_date": "2026-01-28",
-                "route_od": "DOH-BKK",
+                "route_od": "DOH-SFO",
                 "airline_code": "QR",
-                "flight_number": "QR832",
+                "flight_number": "QR737",
                 "departure_time_local": "08:15",
                 "lowest_economy_usd": 730,
                 "lowest_business_usd": 2450,

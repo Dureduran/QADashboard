@@ -80,7 +80,7 @@ const SPECS: Record<string, SpecData> = {
       "Brand Premium Estimation: Historic willingness-to-pay delta over market average."
     ],
     scenario: {
-        problem: "Competitor drops fares by $50 on DOH-BKK. Our automated rule would normally match it.",
+        problem: "Competitor drops fares by $50 on DOH-SFO. Our automated rule would normally match it.",
         action: "Tracker shows our Load Factor is steady despite the gap. Algorithm recommends 'Hold Price' (do not match).",
         uplift: "Avoids unnecessary yield dilution. We keep pricing $50 higher for 200 pax, saving $10,000 in revenue that would have been lost in a price war."
     }
@@ -127,7 +127,7 @@ const SPECS: Record<string, SpecData> = {
   "Overbooking Risk Histogram": {
     title: "Visual F: Revenue vs. Risk Histogram",
     description: "A bar chart showing the 'Net Financial Result' for different levels of overbooking. Green Bars = Revenue gained > Cost; Red Bars = Cost > Revenue.",
-    question: "How aggressively can I overbook flight QR007 to Zagreb without risking expensive compensation payouts?",
+    question: "How aggressively can I overbook DOH-ZAG without risking expensive compensation payouts?",
     data: [
       "Historical No-Show / Go-Show rates",
       "Distribution of connections (Tight vs. Loose)",

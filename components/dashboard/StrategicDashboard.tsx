@@ -136,6 +136,7 @@ export const StrategicDashboard = () => {
     const displayedYield = simulationActive && scenario.simulatedYield ? scenario.simulatedYield : kpi?.yield;
     const displayedRaskTrend = simulationActive ? Math.round(((scenario.simulatedRask - (kpi?.rask || 0)) / (kpi?.rask || 1)) * 1000) / 10 : kpi?.raskTrend;
     const displayedYieldTrend = simulationActive ? Math.round(((scenario.simulatedYield - (kpi?.yield || 0)) / (kpi?.yield || 1)) * 1000) / 10 : kpi?.yieldTrend;
+    const displayedElasticity = averageElasticity(elasticity || []);
 
     // Handle Simulation
     const handleApplySimulation = () => {
@@ -318,7 +319,7 @@ export const StrategicDashboard = () => {
             </div>
 
             {/* 3. DEMAND & COMPETITION (SPLIT VIEW) */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 h-[380px]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:h-[380px]">
                 {/* DEMAND FORECAST */}
                 <Card className="bg-slate-900/80 border-slate-800/50 flex flex-col">
                     <CardHeader className="pb-2">
@@ -498,7 +499,7 @@ export const StrategicDashboard = () => {
             </div>
 
             {/* 5. ADVANCED OPTIMIZATION (ELASTICITY & OVERBOOKING) */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 h-[340px]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:h-[340px]">
                 {/* VISUAL E: Price Elasticity */}
                 <Card className="bg-slate-900/80 border-slate-800/50 flex flex-col">
                     <CardHeader className="pb-2">
@@ -506,7 +507,7 @@ export const StrategicDashboard = () => {
                             <CardTitle className="text-sm font-medium text-slate-300">
                                 Price Elasticity
                             </CardTitle>
-                            <div className="text-[10px] bg-slate-800/50 px-2 py-0.5 rounded text-slate-500">Ed = -1.2</div>
+                            <div className="text-[10px] bg-slate-800/50 px-2 py-0.5 rounded text-slate-500">Ed = {displayedElasticity}</div>
                         </div>
                         <p className="text-[10px] text-slate-500">Revenue sensitivity to price changes</p>
                     </CardHeader>

@@ -46,7 +46,13 @@ test('dashboard navigation, actions, and RM assistant demo path work', async ({ 
 
   await page.getByRole('button', { name: 'RM Assistant' }).click();
   await expect(page.getByText('RM Assistant: Agent Decision Council')).toBeVisible();
+  await expect(page.getByText('DOH-LHR')).toHaveCount(0);
+  await expect(page.getByText('QR123')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Should we close K/L/M on DOH-SFO?' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'How should we protect DOH-JFK?' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'What should we do on DOH-PVG?' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'How should we handle DOH-LOS?' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'What is the right action for DOH-ZAG?' })).toBeVisible();
   await page.getByRole('button', { name: 'Should we close K/L/M on DOH-SFO?' }).click();
   await page.getByPlaceholder(/Should we close K\/L\/M/i).press('Enter');
   await expect(page.getByText('Agents thinking')).toBeVisible({ timeout: 3000 });
@@ -75,4 +81,19 @@ test('dashboard navigation, actions, and RM assistant demo path work', async ({ 
 
   await page.getByTitle('View Alerts').click();
   await expect(page.getByText('No unresolved RM alerts in this demo snapshot')).toBeVisible();
+});
+
+test('RM assistant remains usable on a narrow demo viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(baseUrl, { waitUntil: 'networkidle' });
+
+  await page.getByRole('button', { name: 'Open navigation' }).click();
+  await page.getByRole('button', { name: 'RM Assistant' }).click();
+  await expect(page.getByText('RM Assistant: Agent Decision Council')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Should we close K/L/M on DOH-SFO?' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'How should we protect DOH-JFK?' })).toBeVisible();
+  await expect(page.getByPlaceholder(/Should we close K\/L\/M/i)).toBeVisible();
+
+  const hasHorizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 2);
+  expect(hasHorizontalOverflow).toBe(false);
 });
