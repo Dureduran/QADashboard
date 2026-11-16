@@ -9,6 +9,7 @@ import { DynamicPricingPanel } from './components/dashboard/DynamicPricingPanel'
 import { NoShowPanel } from './components/dashboard/NoShowPanel';
 import { UnconstrainingPanel } from './components/dashboard/UnconstrainingPanel';
 import { ToastProvider } from './components/ui/Toast';
+import { DISCLAIMER } from './lib/disclaimer';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,6 +78,7 @@ const Layout = ({ children, currentView, onNavigate }: LayoutProps) => {
       <div className="flex-1 md:ml-56 flex flex-col h-screen overflow-hidden">
         <Header onMenuClick={() => setSidebarOpen(true)} />
         <main className="flex-1 p-4 md:p-6 overflow-y-auto overflow-x-hidden -webkit-overflow-scrolling-touch">
+          <p className="md:hidden mb-4 text-[11px] leading-snug text-slate-400">{DISCLAIMER}</p>
           <div className="transition-opacity duration-150 ease-in-out">
             {children}
           </div>

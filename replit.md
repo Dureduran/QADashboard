@@ -1,7 +1,7 @@
-# Qatar Airways RM Demo
+# Airline RM Demo
 
 ## Overview
-Qatar Airways Revenue Management Dashboard - A React/TypeScript application built with Vite for displaying airline revenue management analytics and metrics.
+Airline Revenue Management Dashboard (independent portfolio prototype, not affiliated with or endorsed by any airline) - A React/TypeScript application built with Vite for displaying airline revenue management analytics and metrics.
 
 ## Project Architecture
 - **Framework**: React 18 with TypeScript

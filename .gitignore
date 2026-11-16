@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment files (keep real values out of the repository)
+.env
+.env.*
+!.env.example
