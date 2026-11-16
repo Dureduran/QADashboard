@@ -1,4 +1,4 @@
-# 🛫 Qatar Airways Revenue Management Dashboard - Complete Walkthrough
+# 🛫 Airline Revenue Management Dashboard - Complete Walkthrough
 
 A comprehensive demo explaining the data ingestion, machine learning models, visualizations, business problem solutions, and how to work with this application.
 

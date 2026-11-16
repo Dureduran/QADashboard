@@ -1,5 +1,5 @@
 {
-  "name": "Qatar Airways RM Demo",
-  "description": "A high-performance, senior-level revenue management dashboard for Qatar Airways analysts to optimize RASK and load factors.",
+  "name": "Airline RM Demo",
+  "description": "An independent revenue management dashboard demo for airline analysts: load factor, RASK, forecasting, no-show prediction and pricing. Illustrative figures from synthetic and public data. Not affiliated with or endorsed by any airline.",
   "requestFramePermissions": []
 }

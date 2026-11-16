@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 
 import { cn } from '../../lib/utils';
+import { DISCLAIMER } from '../../lib/disclaimer';
 
 interface SidebarProps {
   currentView: string;
@@ -50,7 +51,7 @@ export const Sidebar = ({ currentView, onNavigate, isOpen = false, onClose }: Si
       )}>
       <div className="flex h-14 items-center px-5 border-b border-slate-800/30">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded bg-primary/80 flex items-center justify-center text-white text-[10px] font-semibold">QA</div>
+          <div className="w-7 h-7 rounded bg-primary/80 flex items-center justify-center text-white text-[10px] font-semibold">RM</div>
           <span className="text-slate-400 font-medium text-sm">Revenue Management</span>
         </div>
       </div>
@@ -95,6 +96,10 @@ export const Sidebar = ({ currentView, onNavigate, isOpen = false, onClose }: Si
             ))}
           </div>
         </nav>
+      </div>
+
+      <div className="border-t border-slate-800/30 px-5 py-4">
+        <p className="text-[11px] leading-snug text-slate-400">{DISCLAIMER}</p>
       </div>
       </div>
     </>

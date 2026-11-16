@@ -1,7 +1,7 @@
 <div align="center">
-<img width="1200" height="475" alt="Qatar Airways RM Demo Dashboard" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+<img width="1200" height="475" alt="Airline RM Demo dashboard" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 
-# ✈️ Qatar Airways RM Demo - Airline Revenue Management Dashboard
+# ✈️ Airline RM Demo - Revenue Management Dashboard
 
 **A modern, AI-powered revenue management dashboard for airlines**
 
@@ -14,9 +14,11 @@
 
 ---
 
+> **Independent portfolio prototype.** The figures are illustrative and come from synthetic and public data. This project is not affiliated with or endorsed by Qatar Airways or any other airline. The Doha-hub routes and carrier codes are only a realistic example network.
+
 ## 📋 Overview
 
-Qatar Airways RM Demo is a comprehensive airline revenue management dashboard that provides strategic insights, demand forecasting, dynamic pricing optimization, and an AI-powered assistant. Built with React, TypeScript, and powered by Google's Gemini AI.
+Airline RM Demo is a comprehensive airline revenue management dashboard that provides strategic insights, demand forecasting, dynamic pricing optimization, and an AI-powered assistant. Built with React, TypeScript, and powered by Google's Gemini AI.
 
 ## ✨ Features
 
@@ -99,6 +101,8 @@ The app uses environment variables for configuration:
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `GEMINI_API_KEY` | Google Gemini API key for AI features | Yes |
+
+Optional data-source settings (Supabase and the public data APIs) are listed in `.env.example`. Copy it to `.env` to use them. With nothing set, the dashboard runs on its built-in sample data. Do not commit a real `.env` file.
 
 ## 🎨 Tech Stack
 
